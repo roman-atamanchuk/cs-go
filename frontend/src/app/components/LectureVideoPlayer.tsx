@@ -286,298 +286,322 @@ export default function LectureVideoPlayer() {
           Back to Lecture List
         </Link>
 
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-6xl mx-auto space-y-6">
           {isIntroductionLecture && (
             <section className="rounded-2xl border border-white/10 bg-slate-950/70 p-6 backdrop-blur-sm shadow-2xl">
-              <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">Learning Mode</p>
-                  <h2 className="text-2xl text-white tracking-tight">01 Introduction to Probability</h2>
-                </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    onClick={() => setActiveTopSection("slides")}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                      activeTopSection === "slides"
-                        ? "bg-white text-slate-900"
-                        : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
-                    }`}
-                  >
-                    Lecture Slides
-                  </button>
-                  <button
-                    onClick={() => setActiveTopSection("quiz")}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                      activeTopSection === "quiz"
-                        ? "bg-white text-slate-900"
-                        : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
-                    }`}
-                  >
-                    Quiz
-                  </button>
-                  <button
-                    onClick={() => setActiveTopSection("videos")}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                      activeTopSection === "videos"
-                        ? "bg-white text-slate-900"
-                        : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
-                    }`}
-                  >
-                    Videos
-                  </button>
-                </div>
-              </div>
-
-              {activeTopSection === "slides" ? (
-                <>
-                  <div className="flex items-center justify-between gap-4 mb-5">
-                    <div>
-                      <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">Lecture Slides</p>
-                      <h3 className="text-2xl text-white tracking-tight">Quick Revision Slider</h3>
-                    </div>
-                    <p className="text-sm text-slate-300">
-                      {activeLectureSlide}/{introductionSlides.length}
-                    </p>
+              <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+                <div className="min-w-0">
+                  <div className="mb-6">
+                    <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">Learning Mode</p>
+                    <h2 className="text-2xl text-white tracking-tight">01 Introduction to Probability</h2>
                   </div>
 
-                  <Carousel
-                    setApi={handleSlidesApi}
-                    opts={{ align: "start", loop: false }}
-                    className="px-12 sm:px-16"
-                  >
-                    <CarouselContent>
-                      {introductionSlides.map((slide, index) => (
-                        <CarouselItem key={slide.id} className="basis-full">
-                          <article
-                            onClick={() => slidesApi?.scrollNext()}
-                            className="mx-auto flex w-full max-w-3xl cursor-pointer flex-col gap-6 rounded-3xl bg-white p-8 shadow-sm"
-                          >
-                            <div>
-                              <p className="text-sm text-slate-500 mb-4">Slide {index + 1}</p>
-                              <h3 className="text-3xl font-semibold text-slate-900 mb-5">{slide.topic}</h3>
-                              <p className="text-lg leading-8 text-slate-700">{slide.explanation}</p>
-                            </div>
-
-                            <div className="mt-6 space-y-4">
-                              <SlideVisual slideId={slide.id} />
-                              <div className="rounded-2xl bg-blue-50 px-5 py-4 text-base text-blue-900 leading-7">
-                                {slide.example}
-                              </div>
-                              {slide.extraExamples.map((example) => (
-                                <div
-                                  key={example}
-                                  className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base text-slate-700 leading-7"
-                                >
-                                  {example}
-                                </div>
-                              ))}
-                            </div>
-                          </article>
-                        </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                    <CarouselPrevious className="left-0 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white" />
-                    <CarouselNext className="right-0 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white" />
-                  </Carousel>
-                </>
-              ) : activeTopSection === "quiz" ? (
-                <>
-                  <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                    <div>
-                      <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">Quiz</p>
-                      <h3 className="text-2xl text-white tracking-tight">Slide Quiz</h3>
-                    </div>
-                    <div className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-slate-200">
-                      12 shown from {introductionQuestionBank.length} questions
-                    </div>
+                  <div className="mb-6 flex flex-wrap items-center gap-3">
+                    <button
+                      onClick={() => setActiveTopSection("slides")}
+                      className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                        activeTopSection === "slides"
+                          ? "bg-white text-slate-900"
+                          : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
+                      }`}
+                    >
+                      Lecture Slides
+                    </button>
+                    <button
+                      onClick={() => setActiveTopSection("quiz")}
+                      className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                        activeTopSection === "quiz"
+                          ? "bg-white text-slate-900"
+                          : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
+                      }`}
+                    >
+                      Quiz
+                    </button>
+                    <button
+                      onClick={() => setActiveTopSection("videos")}
+                      className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                        activeTopSection === "videos"
+                          ? "bg-white text-slate-900"
+                          : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
+                      }`}
+                    >
+                      Videos
+                    </button>
                   </div>
 
-                  <Carousel
-                    setApi={setQuizApi}
-                    opts={{ align: "start", loop: false, watchDrag: false }}
-                    className="px-12 sm:px-16"
-                  >
-                    <CarouselContent>
-                      {quizQuestions.flatMap((question, index) => {
-                        const relatedSlide =
-                          introductionSlides.find((slide) => slide.id === question.slideId) ??
-                          introductionSlides[0];
+                  {activeTopSection === "slides" ? (
+                    <>
+                      <div className="flex items-center justify-between gap-4 mb-5">
+                        <div>
+                          <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">Lecture Slides</p>
+                          <h3 className="text-2xl text-white tracking-tight">Quick Revision Slider</h3>
+                        </div>
+                        <p className="text-sm text-slate-300">
+                          {activeLectureSlide}/{introductionSlides.length}
+                        </p>
+                      </div>
 
-                        return [
-                          <CarouselItem key={`${question.id}-question`} className="basis-full">
+                      <Carousel
+                        setApi={handleSlidesApi}
+                        opts={{ align: "start", loop: false }}
+                        className="px-12 sm:px-16"
+                      >
+                        <CarouselContent>
+                          {introductionSlides.map((slide, index) => (
+                            <CarouselItem key={slide.id} className="basis-full">
+                              <article
+                                onClick={() => slidesApi?.scrollNext()}
+                                className="mx-auto flex w-full max-w-3xl cursor-pointer flex-col gap-6 rounded-3xl bg-white p-8 shadow-sm"
+                              >
+                                <div>
+                                  <p className="text-sm text-slate-500 mb-4">Slide {index + 1}</p>
+                                  <h3 className="text-3xl font-semibold text-slate-900 mb-5">{slide.topic}</h3>
+                                  <p className="text-lg leading-8 text-slate-700">{slide.explanation}</p>
+                                </div>
+
+                                <div className="mt-6 space-y-4">
+                                  <SlideVisual slideId={slide.id} />
+                                  <div className="rounded-2xl bg-blue-50 px-5 py-4 text-base text-blue-900 leading-7">
+                                    {slide.example}
+                                  </div>
+                                  {slide.extraExamples.map((example) => (
+                                    <div
+                                      key={example}
+                                      className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base text-slate-700 leading-7"
+                                    >
+                                      {example}
+                                    </div>
+                                  ))}
+                                </div>
+                              </article>
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                        <CarouselPrevious className="left-0 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white" />
+                        <CarouselNext className="right-0 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white" />
+                      </Carousel>
+                    </>
+                  ) : activeTopSection === "quiz" ? (
+                    <>
+                      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                        <div>
+                          <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">Quiz</p>
+                          <h3 className="text-2xl text-white tracking-tight">Slide Quiz</h3>
+                        </div>
+                        <div className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-slate-200">
+                          12 shown from {introductionQuestionBank.length} questions
+                        </div>
+                      </div>
+
+                      <Carousel
+                        setApi={setQuizApi}
+                        opts={{ align: "start", loop: false, watchDrag: false }}
+                        className="px-12 sm:px-16"
+                      >
+                        <CarouselContent>
+                          {quizQuestions.flatMap((question, index) => {
+                            const relatedSlide =
+                              introductionSlides.find((slide) => slide.id === question.slideId) ??
+                              introductionSlides[0];
+
+                            return [
+                              <CarouselItem key={`${question.id}-question`} className="basis-full">
+                                <article className="min-h-[360px] rounded-3xl bg-white p-8 shadow-sm flex flex-col justify-between">
+                                  <div>
+                                    <p className="text-sm text-slate-500 mb-4">Question {index + 1}</p>
+                                    <h3 className="text-2xl font-semibold text-slate-900 mb-6">{question.prompt}</h3>
+
+                                    <div className="grid gap-3">
+                                      {question.options.map((option) => {
+                                        const isSelected = selectedAnswers[question.id] === option;
+
+                                        return (
+                                          <button
+                                            key={option}
+                                            onClick={() => handleAnswer(question, index, option)}
+                                            className={`rounded-2xl border px-5 py-4 text-left text-base font-medium transition-colors ${
+                                              isSelected
+                                                ? "border-slate-900 bg-slate-900 text-white"
+                                                : "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100"
+                                            }`}
+                                          >
+                                            {option}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+
+                                  <div className="mt-6 rounded-2xl bg-slate-100 px-5 py-4 text-sm text-slate-600">
+                                    Correct answers move to the next quiz slide. Wrong answers open the matching explanation slide.
+                                  </div>
+                                </article>
+                              </CarouselItem>,
+                              <CarouselItem key={`${question.id}-explanation`} className="basis-full">
+                                <article className="min-h-[360px] rounded-3xl bg-white p-8 shadow-sm flex flex-col justify-between">
+                                  <div>
+                                    <p className="text-sm text-slate-500 mb-4">Explanation Slide</p>
+                                    <h3 className="text-3xl font-semibold text-slate-900 mb-5">{relatedSlide.topic}</h3>
+                                    <p className="text-lg leading-8 text-slate-700 mb-6">{relatedSlide.explanation}</p>
+
+                                    <div className="rounded-2xl bg-amber-50 px-5 py-4 text-base text-amber-900 leading-7 mb-4">
+                                      Correct answer: {question.correctAnswer}
+                                    </div>
+
+                                    <div className="rounded-2xl bg-blue-50 px-5 py-4 text-base text-blue-900 leading-7">
+                                      {relatedSlide.example}
+                                    </div>
+                                  </div>
+
+                                  <div className="flex flex-wrap items-center gap-3 mt-6">
+                                    <button
+                                      onClick={() => goToQuestionAfter(index)}
+                                      className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+                                    >
+                                      Next Quiz Slide
+                                    </button>
+                                    <div className="text-sm text-slate-500">{question.explanation}</div>
+                                  </div>
+                                </article>
+                              </CarouselItem>,
+                            ];
+                          })}
+
+                          <CarouselItem key="quiz-summary" className="basis-full">
                             <article className="min-h-[360px] rounded-3xl bg-white p-8 shadow-sm flex flex-col justify-between">
                               <div>
-                                <p className="text-sm text-slate-500 mb-4">Question {index + 1}</p>
-                                <h3 className="text-2xl font-semibold text-slate-900 mb-6">{question.prompt}</h3>
-
-                                <div className="grid gap-3">
-                                  {question.options.map((option) => {
-                                    const isSelected = selectedAnswers[question.id] === option;
-
-                                    return (
-                                      <button
-                                        key={option}
-                                        onClick={() => handleAnswer(question, index, option)}
-                                        className={`rounded-2xl border px-5 py-4 text-left text-base font-medium transition-colors ${
-                                          isSelected
-                                            ? "border-slate-900 bg-slate-900 text-white"
-                                            : "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100"
-                                        }`}
-                                      >
-                                        {option}
-                                      </button>
-                                    );
-                                  })}
+                                <p className="text-sm text-slate-500 mb-4">Quiz Summary</p>
+                                <h3 className="text-3xl font-semibold text-slate-900 mb-4">Set Complete</h3>
+                                <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-blue-900 mb-6">
+                                  <CheckCircle2 className="w-5 h-5" />
+                                  Score: {quizScore} / {quizQuestions.length}
                                 </div>
-                              </div>
-
-                              <div className="mt-6 rounded-2xl bg-slate-100 px-5 py-4 text-sm text-slate-600">
-                                Correct answers move to the next quiz slide. Wrong answers open the matching explanation slide.
-                              </div>
-                            </article>
-                          </CarouselItem>,
-                          <CarouselItem key={`${question.id}-explanation`} className="basis-full">
-                            <article className="min-h-[360px] rounded-3xl bg-white p-8 shadow-sm flex flex-col justify-between">
-                              <div>
-                                <p className="text-sm text-slate-500 mb-4">Explanation Slide</p>
-                                <h3 className="text-3xl font-semibold text-slate-900 mb-5">{relatedSlide.topic}</h3>
-                                <p className="text-lg leading-8 text-slate-700 mb-6">{relatedSlide.explanation}</p>
-
-                                <div className="rounded-2xl bg-amber-50 px-5 py-4 text-base text-amber-900 leading-7 mb-4">
-                                  Correct answer: {question.correctAnswer}
-                                </div>
-
-                                <div className="rounded-2xl bg-blue-50 px-5 py-4 text-base text-blue-900 leading-7">
-                                  {relatedSlide.example}
-                                </div>
+                                <p className="text-lg leading-8 text-slate-700">
+                                  This result is for the current 12-question slide set from the larger 100-question bank.
+                                </p>
                               </div>
 
                               <div className="flex flex-wrap items-center gap-3 mt-6">
                                 <button
-                                  onClick={() => goToQuestionAfter(index)}
+                                  onClick={loadNewQuizSet}
                                   className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
                                 >
-                                  Next Quiz Slide
+                                  Load New Questions
                                 </button>
-                                <div className="text-sm text-slate-500">{question.explanation}</div>
+                                <button
+                                  onClick={resetQuiz}
+                                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-200"
+                                >
+                                  <RotateCcw className="w-4 h-4" />
+                                  Reset Quiz
+                                </button>
                               </div>
                             </article>
-                          </CarouselItem>,
-                        ];
-                      })}
+                          </CarouselItem>
+                        </CarouselContent>
+                        <CarouselPrevious className="left-0 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white" />
+                        <CarouselNext className="right-0 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white" />
+                      </Carousel>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                        <div>
+                          <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">Videos</p>
+                          <h3 className="text-2xl text-white tracking-tight">Recommended Video Set</h3>
+                        </div>
+                        <div className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-slate-200">
+                          {activeSupportVideo + 1}/{introductionSupportVideos.length}
+                        </div>
+                      </div>
 
-                      <CarouselItem key="quiz-summary" className="basis-full">
-                        <article className="min-h-[360px] rounded-3xl bg-white p-8 shadow-sm flex flex-col justify-between">
-                          <div>
-                            <p className="text-sm text-slate-500 mb-4">Quiz Summary</p>
-                            <h3 className="text-3xl font-semibold text-slate-900 mb-4">Set Complete</h3>
-                            <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-blue-900 mb-6">
-                              <CheckCircle2 className="w-5 h-5" />
-                              Score: {quizScore} / {quizQuestions.length}
+                      <div className="overflow-hidden rounded-2xl border border-white/10 bg-black aspect-video relative">
+                        {selectedSupportVideo?.embedUrl ? (
+                          <iframe
+                            src={selectedSupportVideo.embedUrl}
+                            title={selectedSupportVideo.title}
+                            className="h-full w-full"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            allowFullScreen
+                          />
+                        ) : selectedSupportVideo ? (
+                          <div className="h-full w-full bg-slate-950 text-white p-8 flex flex-col justify-between">
+                            <div>
+                              <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-3">
+                                Video {selectedSupportVideo.number}
+                              </p>
+                              <h2 className="text-2xl font-semibold mb-4">{selectedSupportVideo.title}</h2>
+                              <p className="text-slate-300 leading-7 max-w-2xl">
+                                This lesson is part of your recommended study list. Open it from the source below
+                                to continue with the matching topic.
+                              </p>
                             </div>
-                            <p className="text-lg leading-8 text-slate-700">
-                              This result is for the current 12-question slide set from the larger 100-question bank.
-                            </p>
-                          </div>
 
-                          <div className="flex flex-wrap items-center gap-3 mt-6">
-                            <button
-                              onClick={loadNewQuizSet}
-                              className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
-                            >
-                              Load New Questions
-                            </button>
-                            <button
-                              onClick={resetQuiz}
-                              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-200"
-                            >
-                              <RotateCcw className="w-4 h-4" />
-                              Reset Quiz
-                            </button>
+                            <div className="flex flex-wrap items-center gap-3">
+                              <a
+                                href={selectedSupportVideo.sourceUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-100"
+                              >
+                                Open {selectedSupportVideo.sourceLabel}
+                              </a>
+                              <div className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-slate-200">
+                                Duration: {selectedSupportVideo.duration}
+                              </div>
+                            </div>
                           </div>
-                        </article>
-                      </CarouselItem>
-                    </CarouselContent>
-                    <CarouselPrevious className="left-0 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white" />
-                    <CarouselNext className="right-0 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white" />
-                  </Carousel>
-                </>
-              ) : (
-                <>
-                  <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center p-6">
+                            <div className="rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-medium text-white">
+                              Video is not connected yet
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <aside className="self-start rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm xl:h-[760px] xl:overflow-hidden">
+                  <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">Videos</p>
-                      <h3 className="text-2xl text-white tracking-tight">Recommended Video Set</h3>
+                      <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">Lecture List</p>
+                      <h3 className="text-xl text-white tracking-tight">Probability Videos</h3>
                     </div>
-                    <div className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-slate-200">
-                      {introductionSupportVideos.length} videos
+                    <div className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs text-slate-200">
+                      {introductionSupportVideos.length} items
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3 mb-5">
+                  <div className="space-y-3 xl:max-h-[650px] xl:overflow-y-auto xl:pr-1">
                     {introductionSupportVideos.map((supportVideo, index) => (
                       <button
                         key={supportVideo.id}
-                        onClick={() => setActiveSupportVideo(index)}
-                        className={`inline-flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
-                          activeSupportVideo === index
-                            ? "bg-white text-slate-900"
-                            : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
+                        onClick={() => {
+                          setActiveSupportVideo(index);
+                          setActiveTopSection("videos");
+                        }}
+                        className={`flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition-colors ${
+                          activeSupportVideo === index && activeTopSection === "videos"
+                            ? "border-white/40 bg-white/15"
+                            : "border-white/10 bg-black/20 hover:bg-white/10"
                         }`}
-                        aria-label={`Open video ${supportVideo.number}: ${supportVideo.title}`}
                       >
-                        {supportVideo.number}
+                        <div className="flex h-16 w-24 shrink-0 flex-col justify-between rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 p-3 text-white">
+                          <span className="text-xs font-medium text-slate-300">Video {supportVideo.number}</span>
+                          <span className="text-sm font-semibold">{supportVideo.duration}</span>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="line-clamp-2 text-sm font-semibold text-white">{supportVideo.title}</p>
+                          <p className="mt-2 text-xs text-slate-300">{supportVideo.sourceLabel}</p>
+                        </div>
                       </button>
                     ))}
                   </div>
-
-                  <div className="overflow-hidden rounded-2xl border border-white/10 bg-black aspect-video relative">
-                    {selectedSupportVideo?.embedUrl ? (
-                      <iframe
-                        src={selectedSupportVideo.embedUrl}
-                        title={selectedSupportVideo.title}
-                        className="h-full w-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        allowFullScreen
-                      />
-                    ) : selectedSupportVideo ? (
-                      <div className="h-full w-full bg-slate-950 text-white p-8 flex flex-col justify-between">
-                        <div>
-                          <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-3">
-                            Video {selectedSupportVideo.number}
-                          </p>
-                          <h2 className="text-2xl font-semibold mb-4">{selectedSupportVideo.title}</h2>
-                          <p className="text-slate-300 leading-7 max-w-2xl">
-                            This lesson is part of your recommended study list. Open it from the source below
-                            to continue with the matching topic.
-                          </p>
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-3">
-                          <a
-                            href={selectedSupportVideo.sourceUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-100"
-                          >
-                            Open {selectedSupportVideo.sourceLabel}
-                          </a>
-                          <div className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-slate-200">
-                            Duration: {selectedSupportVideo.duration}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center p-6">
-                        <div className="rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-medium text-white">
-                          Video is not connected yet
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
+                </aside>
+              </div>
             </section>
           )}
 
