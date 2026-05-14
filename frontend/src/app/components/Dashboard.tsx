@@ -11,10 +11,10 @@ export default function Dashboard() {
 
   const featureCards = [
     {
-      title: "Exam Mode",
+      title: "Study",
       description:
         "Prepare for your exams with targeted study strategies based on past exam questions",
-      primaryLabel: "Start Exam",
+      primaryLabel: "Exam Mode",
       primaryTo: "/exam-mode",
       secondaryLabel: "Lectures",
       secondaryTo: "/lectures",

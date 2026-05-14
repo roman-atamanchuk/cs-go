@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { Link } from "react-router";
 import { ArrowLeft, Play, BookOpen, Clock } from "lucide-react";
 import { lectureCourses } from "../data/lectureLibrary";
 
 export default function Lectures() {
+  const [selectedSemester, setSelectedSemester] = useState(4);
+
   const getColorClasses = (color: string) => {
     const colors: Record<string, { bg: string; icon: string }> = {
       blue: { bg: "bg-blue-100", icon: "text-blue-600" },
@@ -29,9 +32,25 @@ export default function Lectures() {
           Back to Dashboard
         </Link>
 
-        <div className="text-center mb-12">
-          <h1 className="text-3xl mb-2 text-white tracking-tight">Video Lectures</h1>
-          <p className="text-slate-300">Access comprehensive lecture series for all your courses</p>
+        <div className="mb-10">
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex flex-wrap justify-center gap-3">
+              {[1, 2, 3, 4, 5, 7, 8].map((semester) => (
+                <button
+                  key={semester}
+                  type="button"
+                  onClick={() => setSelectedSemester(semester)}
+                  className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
+                    selectedSemester === semester
+                      ? "bg-white text-slate-900"
+                      : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
+                  }`}
+                >
+                  Semester {semester}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-5">

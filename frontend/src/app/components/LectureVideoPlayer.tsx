@@ -21,10 +21,13 @@ import {
 } from "lucide-react";
 import { getLectureVideo } from "../data/lectureLibrary";
 import {
-  getShuffledQuizSubset,
+  getShuffledQuizSubsetFromBank,
   introductionQuestionBank,
   introductionSlides,
   introductionSupportVideos,
+  probabilityRulesQuestionBank,
+  probabilityRulesSlides,
+  probabilityRulesSupportVideos,
   type QuizQuestion,
 } from "../data/introductionProbabilityContent";
 import {
@@ -35,6 +38,24 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "./ui/carousel";
+
+function normalizeSlideId(slideId: string) {
+  if (slideId.startsWith("de-morgan")) return "de-morgan";
+  if (slideId === "rules-notation" || slideId === "probability-range") return "quantifying";
+  if (slideId === "complement-cards") return "complement";
+  if (slideId === "addition-die") return "union-intersection";
+  if (slideId === "simple-addition") return "exclusive-exhaustive";
+  if (
+    slideId === "total-partition" ||
+    slideId === "table-total-law" ||
+    slideId === "unemployment-example"
+  ) {
+    return "total-probability";
+  }
+  if (slideId === "table-counting") return "counting";
+  if (slideId === "table-conditions") return "event";
+  return slideId;
+}
 
 function SlideVisual({ slideId }: { slideId: string }) {
   const visualMap = {
@@ -158,9 +179,50 @@ function SlideVisual({ slideId }: { slideId: string }) {
         { label: "Exhaustive", value: "all" },
       ],
     },
+    "de-morgan": {
+      icon: GitBranch,
+      title: "Logic Switch",
+      accent: "from-pink-100 via-white to-rose-100",
+      badges: ["not(A or B)", "not A and not B", "Venn"],
+      stats: [
+        { label: "Rule 1", value: "(A ∪ B)' = A' ∩ B'" },
+        { label: "Rule 2", value: "(A ∩ B)' = A' ∪ B'" },
+      ],
+    },
+    "total-probability": {
+      icon: Sigma,
+      title: "Add Across Parts",
+      accent: "from-cyan-100 via-white to-sky-100",
+      badges: ["partition", "sum parts", "whole event"],
+      stats: [
+        { label: "Idea", value: "split + add" },
+        { label: "Rule", value: "P(A)=Σ parts" },
+      ],
+    },
+    "conditional-probability": {
+      icon: Target,
+      title: "Given That...",
+      accent: "from-yellow-100 via-white to-amber-100",
+      badges: ["given", "new info", "smokers"],
+      stats: [
+        { label: "Notation", value: "P(A|B)" },
+        { label: "Meaning", value: "A given B" },
+      ],
+    },
+    "order-warning": {
+      icon: FileQuestion,
+      title: "Direction Matters",
+      accent: "from-orange-100 via-white to-red-100",
+      badges: ["A|B", "B|A", "not equal"],
+      stats: [
+        { label: "Left", value: "A given B" },
+        { label: "Right", value: "B given A" },
+      ],
+    },
   } as const;
 
-  const visual = visualMap[slideId as keyof typeof visualMap] ?? visualMap.uncertainty;
+  const visualKey = normalizeSlideId(slideId) as keyof typeof visualMap;
+  const visual = visualMap[visualKey] ?? visualMap.uncertainty;
   const Icon = visual.icon;
 
   return (
@@ -296,16 +358,64 @@ function getSlideCueStyles(slideId: string) {
       exampleLabel: "text-purple-700",
       extra: "border-slate-200 bg-white text-slate-700",
     },
+    "de-morgan": {
+      chip: "bg-rose-50 text-rose-700 border-rose-200",
+      example: "border-rose-200 bg-rose-50 text-rose-950",
+      exampleLabel: "text-rose-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    "total-probability": {
+      chip: "bg-sky-50 text-sky-700 border-sky-200",
+      example: "border-sky-200 bg-sky-50 text-sky-950",
+      exampleLabel: "text-sky-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    "conditional-probability": {
+      chip: "bg-amber-50 text-amber-700 border-amber-200",
+      example: "border-amber-200 bg-amber-50 text-amber-950",
+      exampleLabel: "text-amber-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    "order-warning": {
+      chip: "bg-orange-50 text-orange-700 border-orange-200",
+      example: "border-orange-200 bg-orange-50 text-orange-950",
+      exampleLabel: "text-orange-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
   } as const;
 
-  return cueStyles[slideId as keyof typeof cueStyles] ?? cueStyles.uncertainty;
+  const cueKey = normalizeSlideId(slideId) as keyof typeof cueStyles;
+  return cueStyles[cueKey] ?? cueStyles.uncertainty;
+}
+
+function getLectureExperience(videoId: string) {
+  if (videoId === "probability-statistics-video-01") {
+    return {
+      slides: introductionSlides,
+      questionBank: introductionQuestionBank,
+      supportVideos: introductionSupportVideos,
+    };
+  }
+
+  if (videoId === "probability-statistics-video-02") {
+    return {
+      slides: probabilityRulesSlides,
+      questionBank: probabilityRulesQuestionBank,
+      supportVideos: probabilityRulesSupportVideos,
+    };
+  }
+
+  return undefined;
 }
 
 export default function LectureVideoPlayer() {
   const { lectureId, videoId } = useParams();
   const { course, video } = getLectureVideo(lectureId, videoId);
+  const lectureExperience = getLectureExperience(video.id);
+  const lectureSlides = lectureExperience?.slides ?? [];
+  const lectureQuestionBank = lectureExperience?.questionBank ?? [];
+  const lectureSupportVideos = lectureExperience?.supportVideos ?? [];
 
-  const isIntroductionLecture = video.id === "probability-statistics-video-01";
   const [activeLectureSection, setActiveLectureSection] = useState<"Probability lectures" | "Statistics lectures">(
     video.section === "Statistics lectures" ? "Statistics lectures" : "Probability lectures",
   );
@@ -317,7 +427,7 @@ export default function LectureVideoPlayer() {
   const [activeSupportVideo, setActiveSupportVideo] = useState(0);
 
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>(() =>
-    getShuffledQuizSubset(12),
+    getShuffledQuizSubsetFromBank(lectureQuestionBank, 12),
   );
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
   const [quizApi, setQuizApi] = useState<CarouselApi>();
@@ -325,19 +435,17 @@ export default function LectureVideoPlayer() {
   const quizScore = quizQuestions.filter(
     (question) => selectedAnswers[question.id] === question.correctAnswer,
   ).length;
-  const selectedSupportVideo = isIntroductionLecture
-    ? introductionSupportVideos[activeSupportVideo] ?? introductionSupportVideos[0]
-    : undefined;
+  const selectedSupportVideo = lectureSupportVideos[activeSupportVideo] ?? lectureSupportVideos[0];
 
   function resetQuiz() {
     setSelectedAnswers({});
-    setQuizQuestions(getShuffledQuizSubset(12));
+    setQuizQuestions(getShuffledQuizSubsetFromBank(lectureQuestionBank, 12));
     quizApi?.scrollTo(0);
   }
 
   function loadNewQuizSet() {
     setSelectedAnswers({});
-    setQuizQuestions(getShuffledQuizSubset(12));
+    setQuizQuestions(getShuffledQuizSubsetFromBank(lectureQuestionBank, 12));
     quizApi?.scrollTo(0);
   }
 
@@ -381,6 +489,16 @@ export default function LectureVideoPlayer() {
     );
   }, [video.section]);
 
+  useEffect(() => {
+    setActiveTopSection("slides");
+    setActiveSupportVideo(0);
+    setSelectedAnswers({});
+    setActiveLectureSlide(1);
+    setQuizQuestions(getShuffledQuizSubsetFromBank(lectureQuestionBank, 12));
+    quizApi?.scrollTo(0);
+    slidesApi?.scrollTo(0);
+  }, [video.id]);
+
   return (
     <div className="min-h-screen relative p-6">
       <div
@@ -393,29 +511,44 @@ export default function LectureVideoPlayer() {
       <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-sm" />
 
       <div className="relative z-10 w-full">
-        <Link
-          to="/lectures"
-          className="mb-10 inline-flex items-center gap-2 text-slate-300 transition-colors hover:text-white"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </Link>
-
         <div className="w-full space-y-6">
-          {isIntroductionLecture && (
+          {lectureExperience && (
             <section className="rounded-2xl border border-white/10 bg-slate-950/70 p-6 backdrop-blur-sm shadow-2xl">
               <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
                 <div className="min-w-0">
                   <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                    <div>
-                      <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">Learning Mode</p>
-                      <h2 className="text-2xl text-white tracking-tight">01 Introduction to Probability</h2>
+                    <div className="flex items-start gap-4">
+                      <Link
+                        to="/lectures"
+                        className="mt-0.5 inline-flex items-center gap-2 text-slate-300 transition-colors hover:text-white"
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                        Back
+                      </Link>
+
+                      <div>
+                        <div className="mb-3 flex flex-wrap items-center gap-3">
+                          <button
+                            type="button"
+                            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900"
+                          >
+                            Learning Mode
+                          </button>
+                          <Link
+                            to="/exam-mode"
+                            className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/20"
+                          >
+                            Exam Mode
+                          </Link>
+                        </div>
+                        <h2 className="text-2xl text-white tracking-tight">{video.title}</h2>
+                      </div>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3 xl:justify-end">
                       <a
-                        href={course.pdfLink}
-                        download="01 Introduction to Probability.pdf"
+                        href={video.pdfLink ?? course.pdfLink}
+                        download={`${video.title}.pdf`}
                         className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/20"
                       >
                         <span className="inline-flex items-center gap-2">
@@ -460,17 +593,18 @@ export default function LectureVideoPlayer() {
                     <>
                       <div className="mb-5 flex items-center justify-end gap-4">
                         <p className="text-sm text-slate-300">
-                          {activeLectureSlide}/{introductionSlides.length}
+                          {activeLectureSlide}/{lectureSlides.length}
                         </p>
                       </div>
 
                       <Carousel
+                        key={`${video.id}-slides`}
                         setApi={handleSlidesApi}
                         opts={{ align: "start", loop: false }}
                         className="px-12 sm:px-16"
                       >
                         <CarouselContent>
-                          {introductionSlides.map((slide, index) => (
+                          {lectureSlides.map((slide, index) => (
                             <CarouselItem key={slide.id} className="basis-full">
                               {(() => {
                                 const cueStyles = getSlideCueStyles(slide.id);
@@ -524,11 +658,12 @@ export default function LectureVideoPlayer() {
                           <h3 className="text-2xl text-white tracking-tight">Slide Quiz</h3>
                         </div>
                         <div className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-slate-200">
-                          12 shown from {introductionQuestionBank.length} questions
+                          12 shown from {lectureQuestionBank.length} questions
                         </div>
                       </div>
 
                       <Carousel
+                        key={`${video.id}-quiz`}
                         setApi={setQuizApi}
                         opts={{ align: "start", loop: false, watchDrag: false }}
                         className="px-12 sm:px-16"
@@ -536,8 +671,8 @@ export default function LectureVideoPlayer() {
                         <CarouselContent>
                           {quizQuestions.flatMap((question, index) => {
                             const relatedSlide =
-                              introductionSlides.find((slide) => slide.id === question.slideId) ??
-                              introductionSlides[0];
+                              lectureSlides.find((slide) => slide.id === question.slideId) ??
+                              lectureSlides[0];
 
                             return [
                               <CarouselItem key={`${question.id}-question`} className="basis-full">
@@ -646,7 +781,7 @@ export default function LectureVideoPlayer() {
                           <h3 className="text-2xl text-white tracking-tight">Recommended Video Set</h3>
                         </div>
                         <div className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-slate-200">
-                          {activeSupportVideo + 1}/{introductionSupportVideos.length}
+                          {activeSupportVideo + 1}/{lectureSupportVideos.length}
                         </div>
                       </div>
 
@@ -736,16 +871,13 @@ export default function LectureVideoPlayer() {
                   <div className="space-y-3 xl:max-h-[650px] xl:overflow-y-auto xl:pr-1">
                     {lectureSidebarItems.map((lectureItem, index) => {
                       const isActive = activeLectureIndex === index;
+                      const hasLecturePage = Boolean(getLectureExperience(lectureItem.id));
+                      const itemClasses = `flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition-colors ${
+                        isActive ? "border-white/40 bg-white/15" : "border-white/10 bg-black/20 hover:bg-white/10"
+                      }`;
 
-                      return (
-                        <div
-                          key={lectureItem.id}
-                          className={`flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition-colors ${
-                            isActive
-                              ? "border-white/40 bg-white/15"
-                              : "border-white/10 bg-black/20"
-                          }`}
-                        >
+                      const itemContent = (
+                        <>
                           <div className="flex h-16 w-24 shrink-0 flex-col justify-between rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 p-3 text-white">
                             <span className="text-xs font-medium text-slate-300">Lecture {index + 1}</span>
                             <span className="text-sm font-semibold">
@@ -755,9 +887,23 @@ export default function LectureVideoPlayer() {
                           <div className="min-w-0 flex-1">
                             <p className="line-clamp-3 text-sm font-semibold text-white">{lectureItem.title}</p>
                             <p className="mt-2 text-xs text-slate-300">
-                              {lectureItem.watchUrl ? "Lecture page available" : "Video link will be added"}
+                              {hasLecturePage ? "Slides, quiz, and videos available" : "Video link will be added"}
                             </p>
                           </div>
+                        </>
+                      );
+
+                      return hasLecturePage ? (
+                        <Link
+                          key={lectureItem.id}
+                          to={`/lectures/${course.id}/videos/${lectureItem.id}`}
+                          className={itemClasses}
+                        >
+                          {itemContent}
+                        </Link>
+                      ) : (
+                        <div key={lectureItem.id} className={itemClasses}>
+                          {itemContent}
                         </div>
                       );
                     })}

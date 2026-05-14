@@ -1,4 +1,5 @@
-import probabilityPdf from "@/imports/01 Introduction to Probability.pdf";
+import probabilityPdf from "@/imports/lectures/01-introduction-to-probability.pdf";
+import probabilityRulesPdf from "@/imports/lectures/02-probability-rules.pdf";
 import shot1 from "@/imports/Screenshot_2026-04-19_at_23.43.32.png";
 import shot2 from "@/imports/Screenshot_2026-04-19_at_23.47.10.png";
 import shot3 from "@/imports/Screenshot_2026-04-20_at_00.07.21.png";
@@ -20,6 +21,7 @@ export type LectureVideo = {
   title: string;
   image: string;
   section?: string;
+  pdfLink?: string;
   watchUrl?: string;
   embedUrl?: string;
 };
@@ -79,10 +81,17 @@ export const lectureCourses: LectureCourse[] = [
         title: "01 Introduction to probability",
         image: shot1,
         section: "Probability lectures",
+        pdfLink: probabilityPdf,
         watchUrl: "https://www.youtube.com/watch?v=4T3aOIfNdTY&list=PLMrJAkhIeNNR3sNYvfgiKgcStwuPSts9V&index=2",
         embedUrl: "https://www.youtube.com/embed/4T3aOIfNdTY?list=PLMrJAkhIeNNR3sNYvfgiKgcStwuPSts9V",
       },
-      { id: "probability-statistics-video-02", title: "02 Probability rules", image: shot2, section: "Probability lectures" },
+      {
+        id: "probability-statistics-video-02",
+        title: "02 Probability rules",
+        image: shot2,
+        section: "Probability lectures",
+        pdfLink: probabilityRulesPdf,
+      },
       { id: "probability-statistics-video-03", title: "03 Binomial distribution", image: shot3, section: "Probability lectures" },
       { id: "probability-statistics-video-04", title: "04 Poisson distribution", image: shot4, section: "Probability lectures" },
       { id: "probability-statistics-video-05", title: "05 Normal distribution", image: shot5, section: "Probability lectures" },

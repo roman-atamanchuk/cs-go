@@ -25,6 +25,99 @@ export type SupportVideo = {
   embedUrl?: string;
 };
 
+function rotateOptions(options: string[], amount: number) {
+  const offset = amount % options.length;
+  return options.slice(offset).concat(options.slice(0, offset));
+}
+
+function buildLectureQuestionBank(slides: LectureSlide[], prefix: string) {
+  function buildTopicOptions(correctIndex: number) {
+    const picks = [
+      slides[correctIndex].topic,
+      slides[(correctIndex + 2) % slides.length].topic,
+      slides[(correctIndex + 4) % slides.length].topic,
+      slides[(correctIndex + 6) % slides.length].topic,
+    ];
+    return rotateOptions(picks, correctIndex % picks.length);
+  }
+
+  function buildExplanationOptions(correctIndex: number) {
+    const picks = [
+      slides[correctIndex].explanation,
+      slides[(correctIndex + 2) % slides.length].explanation,
+      slides[(correctIndex + 4) % slides.length].explanation,
+      slides[(correctIndex + 6) % slides.length].explanation,
+    ];
+    return rotateOptions(picks, (correctIndex + 1) % picks.length);
+  }
+
+  function buildExampleOptions(correctIndex: number) {
+    const picks = [
+      slides[correctIndex].example,
+      slides[(correctIndex + 1) % slides.length].example,
+      slides[(correctIndex + 3) % slides.length].example,
+      slides[(correctIndex + 5) % slides.length].example,
+    ];
+    return rotateOptions(picks, (correctIndex + 2) % picks.length);
+  }
+
+  return slides.flatMap((slide, index) => [
+    {
+      id: `${prefix}-${slide.id}-topic`,
+      slideId: slide.id,
+      prompt: `Which topic matches this idea: "${slide.explanation}"?`,
+      options: buildTopicOptions(index),
+      correctAnswer: slide.topic,
+      explanation: `${slide.topic} is correct because that explanation comes directly from this slide.`,
+    },
+    {
+      id: `${prefix}-${slide.id}-example`,
+      slideId: slide.id,
+      prompt: `Choose the best example of "${slide.topic}".`,
+      options: buildExampleOptions(index),
+      correctAnswer: slide.example,
+      explanation: `The lecture example for "${slide.topic}" is: ${slide.example}`,
+    },
+    {
+      id: `${prefix}-${slide.id}-definition`,
+      slideId: slide.id,
+      prompt: `Which explanation best fits "${slide.topic}"?`,
+      options: buildExplanationOptions(index),
+      correctAnswer: slide.explanation,
+      explanation: `The correct definition for "${slide.topic}" is: ${slide.explanation}`,
+    },
+    {
+      id: `${prefix}-${slide.id}-statement`,
+      slideId: slide.id,
+      prompt: `Which statement about "${slide.topic}" is correct?`,
+      options: rotateOptions(
+        [
+          slide.explanation,
+          slides[(index + 2) % slides.length].explanation,
+          slides[(index + 4) % slides.length].explanation,
+          slides[(index + 6) % slides.length].explanation,
+        ],
+        index % 4,
+      ),
+      correctAnswer: slide.explanation,
+      explanation: `"${slide.topic}" is best described by: ${slide.explanation}`,
+    },
+  ]);
+}
+
+export function getShuffledQuizSubsetFromBank(questionBank: QuizQuestion[], count: number) {
+  const shuffled = [...questionBank];
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    const temp = shuffled[index];
+    shuffled[index] = shuffled[swapIndex];
+    shuffled[swapIndex] = temp;
+  }
+
+  return shuffled.slice(0, count);
+}
+
 export const introductionSupportVideos: SupportVideo[] = [
   {
     id: "support-1",
@@ -221,11 +314,6 @@ export const introductionSlides: LectureSlide[] = [
     ],
   },
 ];
-
-function rotateOptions(options: string[], amount: number) {
-  const offset = amount % options.length;
-  return options.slice(offset).concat(options.slice(0, offset));
-}
 
 function buildTopicOptions(correctIndex: number) {
   const picks = [
@@ -611,22 +699,229 @@ function getManualSlideId(questionId: string) {
 }
 
 export const introductionQuestionBank: QuizQuestion[] = [
-  ...generatedSlideQuestions,
+  ...buildLectureQuestionBank(introductionSlides, "intro"),
   ...manualLectureQuestions.map((question) => ({
     ...question,
     slideId: getManualSlideId(question.id),
   })),
 ];
 
-export function getShuffledQuizSubset(count: number) {
-  const shuffled = [...introductionQuestionBank];
+export const probabilityRulesSupportVideos: SupportVideo[] = [
+  {
+    id: "rules-support-1",
+    number: 1,
+    title: "Complementary events",
+    duration: "Duration not confirmed",
+    sourceLabel: "Khan Academy",
+    sourceUrl:
+      "https://www.khanacademy.org/math/class-12-bridge/x09646558c1ff0797%3Aadvanced-counting/x09646558c1ff0797%3Aprobability/v/complementary-events",
+  },
+  {
+    id: "rules-support-2",
+    number: 2,
+    title: "Mutually exclusive events",
+    duration: "8:10",
+    sourceLabel: "Khan Academy",
+    sourceUrl:
+      "https://www.khanacademy.org/math/grade-7-math-snc-aligned/xf9992e17a4bae62e%3Aprobability/xf9992e17a4bae62e%3Amutually-exclusive-and-equally-likely-events/v/mutually-exclusive-events-ur",
+  },
+  {
+    id: "rules-support-3",
+    number: 3,
+    title: "Mutually exclusive and exhaustive events",
+    duration: "9:27",
+    sourceLabel: "Khan Academy",
+    sourceUrl:
+      "https://www.khanacademy.org/math/ka-math-class-11/x0419e5b3b578592a%3Aprobability-ncert-new/x0419e5b3b578592a%3Aalgebra-of-events/v/mutually-exclusive-and-exhaustive-events",
+  },
+  {
+    id: "rules-support-4",
+    number: 4,
+    title: "Probability and sample spaces",
+    duration: "Playlist video 2",
+    sourceLabel: "Khan Academy YouTube",
+    sourceUrl: "https://www.youtube.com/watch?v=obZzOq_wSCg&list=PLC58778F28211FA19&index=2",
+    embedUrl: "https://www.youtube.com/embed/obZzOq_wSCg",
+  },
+  {
+    id: "rules-support-5",
+    number: 5,
+    title: "Probability examples",
+    duration: "Playlist video 3",
+    sourceLabel: "Khan Academy YouTube",
+    sourceUrl: "https://www.youtube.com/watch?v=QE2uR6Z-NcU&list=PLC58778F28211FA19&index=3",
+    embedUrl: "https://www.youtube.com/embed/QE2uR6Z-NcU",
+  },
+];
 
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    const temp = shuffled[index];
-    shuffled[index] = shuffled[swapIndex];
-    shuffled[swapIndex] = temp;
-  }
+export const probabilityRulesSlides: LectureSlide[] = [
+  {
+    id: "rules-notation",
+    topic: "Probability Rules Notation",
+    explanation: "This lecture uses Roman letters such as A, B, and C for events, and Pr(A) for the probability of event A.",
+    example: "Example: If A is the event of passing an exam, then Pr(A) is the probability of passing.",
+    extraExamples: [
+      "Example: A, B, and C can each stand for different events in the same experiment.",
+    ],
+  },
+  {
+    id: "de-morgan-basic",
+    topic: "De Morgan's Laws",
+    explanation: "De Morgan's laws convert complements of unions and intersections into equivalent event statements.",
+    example: "Example: not (A or B) = not A and not B",
+    extraExamples: [
+      "Example: not (A and B) = not A or not B",
+    ],
+  },
+  {
+    id: "de-morgan-application",
+    topic: "De Morgan in an Applied Example",
+    explanation: "De Morgan's laws can be read in plain language using real situations such as data retention across devices.",
+    example: "Example: If data is not on the hard drive or memory stick, then it is not on the hard drive and not on the memory stick.",
+    extraExamples: [
+      "Example: Use a Venn diagram to see why the two statements represent the same event.",
+    ],
+  },
+  {
+    id: "de-morgan-venn",
+    topic: "Venn Diagram Interpretation",
+    explanation: "Venn diagrams help demonstrate event identities by showing the same shaded region in two different ways.",
+    example: "Example: Drill, battery, and corded drill events can be combined to represent 'I can drill a hole'.",
+    extraExamples: [
+      "Example: Pizza delivery events can also be rewritten and interpreted using the same law.",
+    ],
+  },
+  {
+    id: "probability-range",
+    topic: "Probability Range",
+    explanation: "For any event E, the probability must lie between 0 and 1 inclusive.",
+    example: "Example: 0 ≤ Pr(E) ≤ 1",
+    extraExamples: [
+      "Example: Pr(E) = 0 means almost surely impossible and Pr(E) = 1 means almost surely certain.",
+      "Example: The notes also mention unusual infinite cases where probability 0 events can still occur.",
+    ],
+  },
+  {
+    id: "complement-rule",
+    topic: "Complement Law",
+    explanation: "The probability that an event does not happen is 1 minus the probability that it does happen.",
+    example: "Example: Pr(not E) = 1 - Pr(E)",
+    extraExamples: [
+      "Example: Pr(E) + Pr(not E) = 1",
+    ],
+  },
+  {
+    id: "complement-cards",
+    topic: "Complement Law with Cards",
+    explanation: "Sometimes it is easier to calculate the complement event first, especially when the target event is awkward.",
+    example: "Example: Getting at least one club in 5 cards can be solved by first finding the probability of getting no clubs.",
+    extraExamples: [
+      "Example: 'Not at least one club' is the same as 'no clubs'.",
+    ],
+  },
+  {
+    id: "addition-rule",
+    topic: "Addition Law",
+    explanation: "To find the probability of A or B, add the probabilities and subtract the overlap once.",
+    example: "Example: Pr(A ∪ B) = Pr(A) + Pr(B) - Pr(A ∩ B)",
+    extraExamples: [
+      "Example: The overlap A ∩ B must be subtracted because it is counted twice in Pr(A) + Pr(B).",
+    ],
+  },
+  {
+    id: "addition-die",
+    topic: "Addition Law on a Die",
+    explanation: "The addition law can be applied directly once the two events and their overlap are identified.",
+    example: "Example: A = odd, B = at most 4, so A ∩ B = {1, 3}",
+    extraExamples: [
+      "Example: A ∪ B contains outcomes that are odd, at most 4, or both.",
+    ],
+  },
+  {
+    id: "simple-addition",
+    topic: "Simple Addition Law",
+    explanation: "If A and B are disjoint, then there is no overlap and the addition law simplifies.",
+    example: "Example: If A and B are mutually exclusive, Pr(A ∪ B) = Pr(A) + Pr(B)",
+    extraExamples: [
+      "Example: Odd and even on one die roll are disjoint events.",
+    ],
+  },
+  {
+    id: "total-probability",
+    topic: "Law of Total Probability",
+    explanation: "If a population is split into mutually exclusive and collectively exhaustive parts, the total probability can be found by summing across those parts.",
+    example: "Example: Pr(A) = Pr(A ∩ C) + Pr(A ∩ E) + Pr(A ∩ N)",
+    extraExamples: [
+      "Example: Current smoker, ex-smoker, and never smoker form a complete partition of the population.",
+    ],
+  },
+  {
+    id: "total-partition",
+    topic: "A Useful Partition Identity",
+    explanation: "For any event B, the pair B and not B form a complete partition, so any event A can be split across them.",
+    example: "Example: Pr(A) = Pr(A ∩ B) + Pr(A ∩ B')",
+    extraExamples: [
+      "Example: This is a special case of the total law of probability.",
+    ],
+  },
+  {
+    id: "table-counting",
+    topic: "Worked Table Example",
+    explanation: "A grouped results table can be solved by direct counting when the total and favourable counts are known.",
+    example: "Example: Pass probability = (48 + 49 + 63) / 200 = 0.8",
+    extraExamples: [
+      "Example: The engineering, science, and business pass counts add to 160 out of 200.",
+    ],
+  },
+  {
+    id: "table-total-law",
+    topic: "Same Table via Total Law",
+    explanation: "The same table result can be obtained again using the total law of probability across the school groups.",
+    example: "Example: Overall pass rate = pass in engineering + pass in science + pass in business",
+    extraExamples: [
+      "Example: The lecture asks you to show that this also gives 0.8.",
+    ],
+  },
+  {
+    id: "unemployment-example",
+    topic: "Adding Across Male and Female",
+    explanation: "If unemployment is split into male and female parts, the overall unemployment rate is the sum of those two disjoint probabilities.",
+    example: "Example: 11% unemployed males + 8% unemployed females = 19% unemployed overall",
+    extraExamples: [
+      "Example: Let G = unemployed and M = male, then the same result can be written in probability notation.",
+    ],
+  },
+  {
+    id: "conditional-probability",
+    topic: "Conditional Probability",
+    explanation: "Conditional probability updates a probability after extra information about the case is known.",
+    example: "Example: Pr(I | S) = 0.08 means illness probability given the person is a smoker.",
+    extraExamples: [
+      "Example: The overall illness rate may be 0.03, but it rises to 0.08 among smokers.",
+      "Example: The condition after the bar changes the reference group.",
+    ],
+  },
+  {
+    id: "order-warning",
+    topic: "Pr(A | B) Is Not Pr(B | A)",
+    explanation: "Changing the order in a conditional probability changes the meaning completely.",
+    example: "Example: The percentage of smokers with asthma is not the same as the percentage of asthma sufferers who smoke.",
+    extraExamples: [
+      "Example: Pr(Incarcerated | Male) can be tiny while Pr(Male | Incarcerated) can be very large.",
+    ],
+  },
+  {
+    id: "table-conditions",
+    topic: "Reading Conditional Probabilities from a Table",
+    explanation: "A cross-tab lets you interpret expressions like B | M, M | B, or not M | D carefully and separately.",
+    example: "Example: B | M means bus given male, while M | B means male given bus.",
+    extraExamples: [
+      "Example: The two conditions use different denominators and answer different questions.",
+    ],
+  },
+];
 
-  return shuffled.slice(0, count);
-}
+export const probabilityRulesQuestionBank: QuizQuestion[] = buildLectureQuestionBank(
+  probabilityRulesSlides,
+  "rules",
+);
