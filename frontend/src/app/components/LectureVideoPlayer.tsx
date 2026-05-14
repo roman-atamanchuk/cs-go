@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import {
   ArrowLeft,
@@ -6,6 +6,7 @@ import {
   CirclePercent,
   Coins,
   Dices,
+  Download,
   FileQuestion,
   Gauge,
   GitBranch,
@@ -124,7 +125,7 @@ function SlideVisual({ slideId }: { slideId: string }) {
       badges: ["H", "T", "{1..6}"],
       stats: [
         { label: "Coin", value: "{H,T}" },
-        { label: "Two flips", value: "4" },
+        { label: "Two flips outcomes", value: "HH, HT, TH, TT" },
       ],
     },
     event: {
@@ -197,11 +198,119 @@ function SlideVisual({ slideId }: { slideId: string }) {
   );
 }
 
+function getSlideCueStyles(slideId: string) {
+  const cueStyles = {
+    uncertainty: {
+      chip: "bg-indigo-50 text-indigo-700 border-indigo-200",
+      example: "border-indigo-200 bg-indigo-50 text-indigo-950",
+      exampleLabel: "text-indigo-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    quantifying: {
+      chip: "bg-sky-50 text-sky-700 border-sky-200",
+      example: "border-sky-200 bg-sky-50 text-sky-950",
+      exampleLabel: "text-sky-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    odds: {
+      chip: "bg-amber-50 text-amber-700 border-amber-200",
+      example: "border-amber-200 bg-amber-50 text-amber-950",
+      exampleLabel: "text-amber-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    classical: {
+      chip: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      example: "border-emerald-200 bg-emerald-50 text-emerald-950",
+      exampleLabel: "text-emerald-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    empirical: {
+      chip: "bg-teal-50 text-teal-700 border-teal-200",
+      example: "border-teal-200 bg-teal-50 text-teal-950",
+      exampleLabel: "text-teal-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    "relative-frequency": {
+      chip: "bg-violet-50 text-violet-700 border-violet-200",
+      example: "border-violet-200 bg-violet-50 text-violet-950",
+      exampleLabel: "text-violet-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    subjective: {
+      chip: "bg-rose-50 text-rose-700 border-rose-200",
+      example: "border-rose-200 bg-rose-50 text-rose-950",
+      exampleLabel: "text-rose-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    counting: {
+      chip: "bg-slate-100 text-slate-700 border-slate-200",
+      example: "border-slate-300 bg-slate-100 text-slate-950",
+      exampleLabel: "text-slate-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    "sample-space": {
+      chip: "bg-blue-50 text-blue-700 border-blue-200",
+      example: "border-blue-200 bg-blue-50 text-blue-950",
+      exampleLabel: "text-blue-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    event: {
+      chip: "bg-cyan-50 text-cyan-700 border-cyan-200",
+      example: "border-cyan-200 bg-cyan-50 text-cyan-950",
+      exampleLabel: "text-cyan-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    complement: {
+      chip: "bg-orange-50 text-orange-700 border-orange-200",
+      example: "border-orange-200 bg-orange-50 text-orange-950",
+      exampleLabel: "text-orange-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    "exclusive-exhaustive": {
+      chip: "bg-lime-50 text-lime-700 border-lime-200",
+      example: "border-lime-200 bg-lime-50 text-lime-950",
+      exampleLabel: "text-lime-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    "union-intersection": {
+      chip: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200",
+      example: "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-950",
+      exampleLabel: "text-fuchsia-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    "omega-null": {
+      chip: "bg-indigo-50 text-indigo-700 border-indigo-200",
+      example: "border-indigo-200 bg-indigo-50 text-indigo-950",
+      exampleLabel: "text-indigo-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    "probability-models": {
+      chip: "bg-green-50 text-green-700 border-green-200",
+      example: "border-green-200 bg-green-50 text-green-950",
+      exampleLabel: "text-green-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+    equivalence: {
+      chip: "bg-purple-50 text-purple-700 border-purple-200",
+      example: "border-purple-200 bg-purple-50 text-purple-950",
+      exampleLabel: "text-purple-700",
+      extra: "border-slate-200 bg-white text-slate-700",
+    },
+  } as const;
+
+  return cueStyles[slideId as keyof typeof cueStyles] ?? cueStyles.uncertainty;
+}
+
 export default function LectureVideoPlayer() {
   const { lectureId, videoId } = useParams();
   const { course, video } = getLectureVideo(lectureId, videoId);
 
   const isIntroductionLecture = video.id === "probability-statistics-video-01";
+  const [activeLectureSection, setActiveLectureSection] = useState<"Probability lectures" | "Statistics lectures">(
+    video.section === "Statistics lectures" ? "Statistics lectures" : "Probability lectures",
+  );
+  const lectureSidebarItems = course.videoItems.filter((item) => item.section === activeLectureSection);
+  const activeLectureIndex = lectureSidebarItems.findIndex((item) => item.id === video.id);
   const [activeTopSection, setActiveTopSection] = useState<"slides" | "quiz" | "videos">("slides");
   const [slidesApi, setSlidesApi] = useState<CarouselApi>();
   const [activeLectureSlide, setActiveLectureSlide] = useState(1);
@@ -266,6 +375,12 @@ export default function LectureVideoPlayer() {
     api.on("reInit", updateActiveSlide);
   }
 
+  useEffect(() => {
+    setActiveLectureSection(
+      video.section === "Statistics lectures" ? "Statistics lectures" : "Probability lectures",
+    );
+  }, [video.section]);
+
   return (
     <div className="min-h-screen relative p-6">
       <div
@@ -277,65 +392,73 @@ export default function LectureVideoPlayer() {
       />
       <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-sm" />
 
-      <div className="max-w-6xl mx-auto relative z-10">
+      <div className="relative z-10 w-full">
         <Link
           to={`/lectures/${course.id}`}
-          className="inline-flex items-center gap-2 text-slate-300 hover:text-white mb-10 transition-colors"
+          className="mb-10 inline-flex items-center gap-2 text-slate-300 transition-colors hover:text-white"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Lecture List
+          Back
         </Link>
 
-        <div className="max-w-6xl mx-auto space-y-6">
+        <div className="w-full space-y-6">
           {isIntroductionLecture && (
             <section className="rounded-2xl border border-white/10 bg-slate-950/70 p-6 backdrop-blur-sm shadow-2xl">
-              <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+              <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
                 <div className="min-w-0">
-                  <div className="mb-6">
-                    <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">Learning Mode</p>
-                    <h2 className="text-2xl text-white tracking-tight">01 Introduction to Probability</h2>
-                  </div>
+                  <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                    <div>
+                      <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">Learning Mode</p>
+                      <h2 className="text-2xl text-white tracking-tight">01 Introduction to Probability</h2>
+                    </div>
 
-                  <div className="mb-6 flex flex-wrap items-center gap-3">
-                    <button
-                      onClick={() => setActiveTopSection("slides")}
-                      className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                        activeTopSection === "slides"
-                          ? "bg-white text-slate-900"
-                          : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
-                      }`}
-                    >
-                      Lecture Slides
-                    </button>
-                    <button
-                      onClick={() => setActiveTopSection("quiz")}
-                      className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                        activeTopSection === "quiz"
-                          ? "bg-white text-slate-900"
-                          : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
-                      }`}
-                    >
-                      Quiz
-                    </button>
-                    <button
-                      onClick={() => setActiveTopSection("videos")}
-                      className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                        activeTopSection === "videos"
-                          ? "bg-white text-slate-900"
-                          : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
-                      }`}
-                    >
-                      Videos
-                    </button>
+                    <div className="flex flex-wrap items-center gap-3 xl:justify-end">
+                      <a
+                        href={course.pdfLink}
+                        download="01 Introduction to Probability.pdf"
+                        className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/20"
+                      >
+                        <span className="inline-flex items-center gap-2">
+                          <Download className="h-4 w-4" />
+                          Download PDF
+                        </span>
+                      </a>
+                      <button
+                        onClick={() => setActiveTopSection("slides")}
+                        className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                          activeTopSection === "slides"
+                            ? "bg-white text-slate-900"
+                            : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
+                        }`}
+                      >
+                        Lecture Slides
+                      </button>
+                      <button
+                        onClick={() => setActiveTopSection("quiz")}
+                        className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                          activeTopSection === "quiz"
+                            ? "bg-white text-slate-900"
+                            : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
+                        }`}
+                      >
+                        Quiz
+                      </button>
+                      <button
+                        onClick={() => setActiveTopSection("videos")}
+                        className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                          activeTopSection === "videos"
+                            ? "bg-white text-slate-900"
+                            : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
+                        }`}
+                      >
+                        Videos
+                      </button>
+                    </div>
                   </div>
 
                   {activeTopSection === "slides" ? (
                     <>
-                      <div className="flex items-center justify-between gap-4 mb-5">
-                        <div>
-                          <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">Lecture Slides</p>
-                          <h3 className="text-2xl text-white tracking-tight">Quick Revision Slider</h3>
-                        </div>
+                      <div className="mb-5 flex items-center justify-end gap-4">
                         <p className="text-sm text-slate-300">
                           {activeLectureSlide}/{introductionSlides.length}
                         </p>
@@ -349,31 +472,43 @@ export default function LectureVideoPlayer() {
                         <CarouselContent>
                           {introductionSlides.map((slide, index) => (
                             <CarouselItem key={slide.id} className="basis-full">
-                              <article
-                                onClick={() => slidesApi?.scrollNext()}
-                                className="mx-auto flex w-full max-w-3xl cursor-pointer flex-col gap-6 rounded-3xl bg-white p-8 shadow-sm"
-                              >
-                                <div>
-                                  <p className="text-sm text-slate-500 mb-4">Slide {index + 1}</p>
-                                  <h3 className="text-3xl font-semibold text-slate-900 mb-5">{slide.topic}</h3>
-                                  <p className="text-lg leading-8 text-slate-700">{slide.explanation}</p>
-                                </div>
+                              {(() => {
+                                const cueStyles = getSlideCueStyles(slide.id);
 
-                                <div className="mt-6 space-y-4">
-                                  <SlideVisual slideId={slide.id} />
-                                  <div className="rounded-2xl bg-blue-50 px-5 py-4 text-base text-blue-900 leading-7">
-                                    {slide.example}
-                                  </div>
-                                  {slide.extraExamples.map((example) => (
-                                    <div
-                                      key={example}
-                                      className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base text-slate-700 leading-7"
-                                    >
-                                      {example}
+                                return (
+                                  <article
+                                    onClick={() => slidesApi?.scrollNext()}
+                                    className="mx-auto flex w-full max-w-3xl cursor-pointer flex-col gap-6 rounded-3xl bg-white p-8 shadow-sm"
+                                  >
+                                    <div>
+                                      <h3 className="mb-5 text-3xl font-semibold text-slate-900">{slide.topic}</h3>
+                                      <p className="text-lg leading-8 text-slate-800">{slide.explanation}</p>
                                     </div>
-                                  ))}
-                                </div>
-                              </article>
+
+                                    <div className="mt-4 space-y-4">
+                                      <SlideVisual slideId={slide.id} />
+                                      <div
+                                        className={`rounded-2xl border-l-4 px-5 py-4 leading-7 ${cueStyles.example}`}
+                                      >
+                                        <p
+                                          className={`mb-2 text-xs font-semibold uppercase tracking-[0.18em] ${cueStyles.exampleLabel}`}
+                                        >
+                                          Key example
+                                        </p>
+                                        <p className="text-base font-medium">{slide.example}</p>
+                                      </div>
+                                      {slide.extraExamples.map((example) => (
+                                        <div
+                                          key={example}
+                                          className={`rounded-2xl border px-5 py-4 text-base leading-7 ${cueStyles.extra}`}
+                                        >
+                                          {example}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </article>
+                                );
+                              })()}
                             </CarouselItem>
                           ))}
                         </CarouselContent>
@@ -568,37 +703,64 @@ export default function LectureVideoPlayer() {
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
                       <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">Lecture List</p>
-                      <h3 className="text-xl text-white tracking-tight">Probability Videos</h3>
+                      <h3 className="text-xl text-white tracking-tight">{activeLectureSection}</h3>
                     </div>
                     <div className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs text-slate-200">
-                      {introductionSupportVideos.length} items
+                      {lectureSidebarItems.length} items
                     </div>
                   </div>
 
+                  <div className="mb-4 flex flex-wrap gap-3">
+                    <button
+                      onClick={() => setActiveLectureSection("Probability lectures")}
+                      className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                        activeLectureSection === "Probability lectures"
+                          ? "bg-white text-slate-900"
+                          : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
+                      }`}
+                    >
+                      Probability
+                    </button>
+                    <button
+                      onClick={() => setActiveLectureSection("Statistics lectures")}
+                      className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                        activeLectureSection === "Statistics lectures"
+                          ? "bg-white text-slate-900"
+                          : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
+                      }`}
+                    >
+                      Statistics
+                    </button>
+                  </div>
+
                   <div className="space-y-3 xl:max-h-[650px] xl:overflow-y-auto xl:pr-1">
-                    {introductionSupportVideos.map((supportVideo, index) => (
-                      <button
-                        key={supportVideo.id}
-                        onClick={() => {
-                          setActiveSupportVideo(index);
-                          setActiveTopSection("videos");
-                        }}
-                        className={`flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition-colors ${
-                          activeSupportVideo === index && activeTopSection === "videos"
-                            ? "border-white/40 bg-white/15"
-                            : "border-white/10 bg-black/20 hover:bg-white/10"
-                        }`}
-                      >
-                        <div className="flex h-16 w-24 shrink-0 flex-col justify-between rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 p-3 text-white">
-                          <span className="text-xs font-medium text-slate-300">Video {supportVideo.number}</span>
-                          <span className="text-sm font-semibold">{supportVideo.duration}</span>
+                    {lectureSidebarItems.map((lectureItem, index) => {
+                      const isActive = activeLectureIndex === index;
+
+                      return (
+                        <div
+                          key={lectureItem.id}
+                          className={`flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition-colors ${
+                            isActive
+                              ? "border-white/40 bg-white/15"
+                              : "border-white/10 bg-black/20"
+                          }`}
+                        >
+                          <div className="flex h-16 w-24 shrink-0 flex-col justify-between rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 p-3 text-white">
+                            <span className="text-xs font-medium text-slate-300">Lecture {index + 1}</span>
+                            <span className="text-sm font-semibold">
+                              {lectureItem.title.split(" ").slice(0, 2).join(" ")}
+                            </span>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="line-clamp-3 text-sm font-semibold text-white">{lectureItem.title}</p>
+                            <p className="mt-2 text-xs text-slate-300">
+                              {lectureItem.watchUrl ? "Lecture page available" : "Video link will be added"}
+                            </p>
+                          </div>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="line-clamp-2 text-sm font-semibold text-white">{supportVideo.title}</p>
-                          <p className="mt-2 text-xs text-slate-300">{supportVideo.sourceLabel}</p>
-                        </div>
-                      </button>
-                    ))}
+                      );
+                    })}
                   </div>
                 </aside>
               </div>

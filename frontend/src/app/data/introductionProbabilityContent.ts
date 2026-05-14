@@ -149,10 +149,12 @@ export const introductionSlides: LectureSlide[] = [
   {
     id: "sample-space",
     topic: "Sample Space",
-    explanation: "The sample space is the set of all possible outcomes.",
+    explanation:
+      "The sample space is the set of all possible outcomes. For a coin, each flip has 2 outcomes: H or T, so the number of possible outcomes doubles with each new flip.",
     example: "Example: One coin flip -> {H, T}",
     extraExamples: [
       "Example: Die roll -> {1, 2, 3, 4, 5, 6}",
+      "Example: 1 flip -> 2^1 = 2, 2 flips -> 2^2 = 4, 3 flips -> 2^3 = 8, so in general n flips -> 2^n outcomes.",
     ],
   },
   {
