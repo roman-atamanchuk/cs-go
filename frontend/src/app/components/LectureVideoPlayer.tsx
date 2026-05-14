@@ -1,6 +1,23 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router";
-import { ArrowLeft, CheckCircle2, PlayCircle, RotateCcw } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  CirclePercent,
+  Coins,
+  Dices,
+  FileQuestion,
+  Gauge,
+  GitBranch,
+  PlayCircle,
+  RotateCcw,
+  Scale,
+  Shapes,
+  ShieldQuestion,
+  Sigma,
+  Sparkles,
+  Target,
+} from "lucide-react";
 import { getLectureVideo } from "../data/lectureLibrary";
 import {
   getShuffledQuizSubset,
@@ -18,6 +35,168 @@ import {
   type CarouselApi,
 } from "./ui/carousel";
 
+function SlideVisual({ slideId }: { slideId: string }) {
+  const visualMap = {
+    uncertainty: {
+      icon: ShieldQuestion,
+      title: "Uncertain Event",
+      accent: "from-indigo-100 via-white to-sky-100",
+      badges: ["Weather", "Bus time", "Coin flip"],
+      stats: [
+        { label: "Known?", value: "No" },
+        { label: "Chance", value: "?" },
+      ],
+    },
+    quantifying: {
+      icon: CirclePercent,
+      title: "Same Chance, 3 Forms",
+      accent: "from-blue-100 via-white to-cyan-100",
+      badges: ["1/2", "0.5", "50%"],
+      stats: [
+        { label: "Fraction", value: "1/6" },
+        { label: "Percent", value: "16.7%" },
+      ],
+    },
+    odds: {
+      icon: Dices,
+      title: "Odds Panel",
+      accent: "from-amber-100 via-white to-orange-100",
+      badges: ["1 favourable", "5 not favourable"],
+      stats: [
+        { label: "Odds", value: "1:5" },
+        { label: "Die", value: "3" },
+      ],
+    },
+    classical: {
+      icon: Target,
+      title: "Equally Likely",
+      accent: "from-emerald-100 via-white to-lime-100",
+      badges: ["Fair coin", "Fair die", "Cards"],
+      stats: [
+        { label: "Rule", value: "fav/total" },
+        { label: "Example", value: "1/6" },
+      ],
+    },
+    empirical: {
+      icon: Gauge,
+      title: "Observed Results",
+      accent: "from-teal-100 via-white to-emerald-100",
+      badges: ["Sample", "Count", "Estimate"],
+      stats: [
+        { label: "Heads", value: "12/20" },
+        { label: "Value", value: "0.6" },
+      ],
+    },
+    "relative-frequency": {
+      icon: GitBranch,
+      title: "Large Samples",
+      accent: "from-violet-100 via-white to-fuchsia-100",
+      badges: ["10 flips", "100 flips", "1000 flips"],
+      stats: [
+        { label: "Trend", value: "stabilises" },
+        { label: "Closer to", value: "50/50" },
+      ],
+    },
+    subjective: {
+      icon: Sparkles,
+      title: "Personal Judgement",
+      accent: "from-rose-100 via-white to-pink-100",
+      badges: ["Doctor", "Coach", "Investor"],
+      stats: [
+        { label: "Belief", value: "90%" },
+        { label: "Type", value: "one-off" },
+      ],
+    },
+    counting: {
+      icon: Sigma,
+      title: "Count Outcomes",
+      accent: "from-slate-100 via-white to-zinc-100",
+      badges: ["Favourable", "Total", "Ratio"],
+      stats: [
+        { label: "Formula", value: "n/N" },
+        { label: "Goal", value: "probability" },
+      ],
+    },
+    "sample-space": {
+      icon: Shapes,
+      title: "Possible Outcomes",
+      accent: "from-sky-100 via-white to-blue-100",
+      badges: ["H", "T", "{1..6}"],
+      stats: [
+        { label: "Coin", value: "{H,T}" },
+        { label: "Two flips", value: "4" },
+      ],
+    },
+    event: {
+      icon: FileQuestion,
+      title: "Event as a Set",
+      accent: "from-cyan-100 via-white to-teal-100",
+      badges: ["Odd", "Even", "> 4"],
+      stats: [
+        { label: "Odd", value: "{1,3,5}" },
+        { label: "Simple?", value: "1 or many" },
+      ],
+    },
+    complement: {
+      icon: Coins,
+      title: "Opposite Event",
+      accent: "from-orange-100 via-white to-amber-100",
+      badges: ["Not even", "Not heads", "Not > 4"],
+      stats: [
+        { label: "Heads'", value: "tails" },
+        { label: "A'", value: "not A" },
+      ],
+    },
+    "exclusive-exhaustive": {
+      icon: Scale,
+      title: "Exclusive vs Exhaustive",
+      accent: "from-lime-100 via-white to-green-100",
+      badges: ["Cannot overlap", "Cover all", "Odd/Even"],
+      stats: [
+        { label: "Exclusive", value: "yes/no" },
+        { label: "Exhaustive", value: "all" },
+      ],
+    },
+  } as const;
+
+  const visual = visualMap[slideId as keyof typeof visualMap] ?? visualMap.uncertainty;
+  const Icon = visual.icon;
+
+  return (
+    <div className={`rounded-3xl border border-slate-200 bg-gradient-to-br ${visual.accent} p-6`}>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium text-slate-500 mb-2">Visual summary</p>
+          <h4 className="text-xl font-semibold text-slate-900">{visual.title}</h4>
+        </div>
+        <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/80 text-slate-900 shadow-sm">
+          <Icon className="h-7 w-7" />
+        </div>
+      </div>
+
+      <div className="mt-5 flex flex-wrap gap-2">
+        {visual.badges.map((badge) => (
+          <div
+            key={badge}
+            className="rounded-full border border-white/70 bg-white/80 px-3 py-1.5 text-sm font-medium text-slate-700"
+          >
+            {badge}
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        {visual.stats.map((stat) => (
+          <div key={stat.label} className="rounded-2xl bg-white/80 px-4 py-3">
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-500 mb-1">{stat.label}</p>
+            <p className="text-lg font-semibold text-slate-900">{stat.value}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function LectureVideoPlayer() {
   const { lectureId, videoId } = useParams();
   const { course, video } = getLectureVideo(lectureId, videoId);
@@ -25,6 +204,7 @@ export default function LectureVideoPlayer() {
   const isIntroductionLecture = video.id === "probability-statistics-video-01";
   const [activeTopSection, setActiveTopSection] = useState<"slides" | "quiz" | "videos">("slides");
   const [slidesApi, setSlidesApi] = useState<CarouselApi>();
+  const [activeLectureSlide, setActiveLectureSlide] = useState(1);
   const [activeSupportVideo, setActiveSupportVideo] = useState(0);
 
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>(() =>
@@ -70,6 +250,20 @@ export default function LectureVideoPlayer() {
     }
 
     quizApi?.scrollTo(questionIndex * 2 + 1);
+  }
+
+  function handleSlidesApi(api?: CarouselApi) {
+    setSlidesApi(api);
+
+    if (!api) return;
+
+    const updateActiveSlide = () => {
+      setActiveLectureSlide(api.selectedScrollSnap() + 1);
+    };
+
+    updateActiveSlide();
+    api.on("select", updateActiveSlide);
+    api.on("reInit", updateActiveSlide);
   }
 
   return (
@@ -141,20 +335,22 @@ export default function LectureVideoPlayer() {
                       <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">Lecture Slides</p>
                       <h3 className="text-2xl text-white tracking-tight">Quick Revision Slider</h3>
                     </div>
-                    <p className="text-sm text-slate-300">{introductionSlides.length} slides</p>
+                    <p className="text-sm text-slate-300">
+                      {activeLectureSlide}/{introductionSlides.length}
+                    </p>
                   </div>
 
                   <Carousel
-                    setApi={setSlidesApi}
+                    setApi={handleSlidesApi}
                     opts={{ align: "start", loop: false }}
-                    className="px-12 sm:px-16 min-h-[72vh]"
+                    className="px-12 sm:px-16"
                   >
                     <CarouselContent>
                       {introductionSlides.map((slide, index) => (
                         <CarouselItem key={slide.id} className="basis-full">
                           <article
                             onClick={() => slidesApi?.scrollNext()}
-                            className="mx-auto flex min-h-[72vh] w-full max-w-3xl cursor-pointer flex-col justify-between rounded-3xl bg-white p-8 shadow-sm lg:aspect-square lg:min-h-0"
+                            className="mx-auto flex w-full max-w-3xl cursor-pointer flex-col gap-6 rounded-3xl bg-white p-8 shadow-sm"
                           >
                             <div>
                               <p className="text-sm text-slate-500 mb-4">Slide {index + 1}</p>
@@ -162,7 +358,8 @@ export default function LectureVideoPlayer() {
                               <p className="text-lg leading-8 text-slate-700">{slide.explanation}</p>
                             </div>
 
-                            <div className="mt-6 space-y-3">
+                            <div className="mt-6 space-y-4">
+                              <SlideVisual slideId={slide.id} />
                               <div className="rounded-2xl bg-blue-50 px-5 py-4 text-base text-blue-900 leading-7">
                                 {slide.example}
                               </div>

@@ -81,7 +81,6 @@ export const introductionSlides: LectureSlide[] = [
     example: "Example: Will it rain tomorrow?",
     extraExamples: [
       "Example: Will the next bus arrive in 5 minutes?",
-      "Example: Will a coin land on heads?",
     ],
   },
   {
@@ -91,7 +90,6 @@ export const introductionSlides: LectureSlide[] = [
     example: "Example: 1/6 = 0.167 = 16.7%",
     extraExamples: [
       "Example: 1/2 = 0.5 = 50%",
-      "Example: 3/4 = 0.75 = 75%",
     ],
   },
   {
@@ -101,7 +99,6 @@ export const introductionSlides: LectureSlide[] = [
     example: "Example: Getting a 3 on a die has odds 1 to 5.",
     extraExamples: [
       "Example: 1 head vs 1 tail gives odds 1 to 1.",
-      "Example: One ace vs 51 non-aces gives odds 1 to 51.",
     ],
   },
   {
@@ -111,7 +108,6 @@ export const introductionSlides: LectureSlide[] = [
     example: "Example: P(rolling a 3) = 1/6",
     extraExamples: [
       "Example: P(heads on a fair coin) = 1/2",
-      "Example: P(drawing a king from 52 cards) = 4/52",
     ],
   },
   {
@@ -121,7 +117,6 @@ export const introductionSlides: LectureSlide[] = [
     example: "Example: 12 heads in 20 flips gives 12/20 = 0.6",
     extraExamples: [
       "Example: 7 rainy days in 10 days gives 0.7",
-      "Example: 18 red balls in 30 picks gives 0.6",
     ],
   },
   {
@@ -131,7 +126,6 @@ export const introductionSlides: LectureSlide[] = [
     example: "Example: More coin flips usually move closer to 50/50.",
     extraExamples: [
       "Example: 10 flips can be uneven, 1,000 flips are usually closer to half heads.",
-      "Example: More survey answers usually give a steadier estimate.",
     ],
   },
   {
@@ -141,7 +135,6 @@ export const introductionSlides: LectureSlide[] = [
     example: "Example: A doctor estimates a treatment has 90% success.",
     extraExamples: [
       "Example: A coach believes a team has a strong chance to win.",
-      "Example: An investor judges a market rise as likely.",
     ],
   },
   {
@@ -151,7 +144,6 @@ export const introductionSlides: LectureSlide[] = [
     example: "Example: Favourable / total",
     extraExamples: [
       "Example: 2 red marbles out of 5 gives 2/5.",
-      "Example: 3 even outcomes on a die gives 3/6.",
     ],
   },
   {
@@ -161,7 +153,6 @@ export const introductionSlides: LectureSlide[] = [
     example: "Example: One coin flip -> {H, T}",
     extraExamples: [
       "Example: Die roll -> {1, 2, 3, 4, 5, 6}",
-      "Example: Two coin flips -> {HH, HT, TH, TT}",
     ],
   },
   {
@@ -171,7 +162,15 @@ export const introductionSlides: LectureSlide[] = [
     example: "Example: Odd on a die -> {1, 3, 5}",
     extraExamples: [
       "Example: Rolling more than 4 -> {5, 6}",
-      "Example: Drawing a heart from cards.",
+    ],
+  },
+  {
+    id: "union-intersection",
+    topic: "Union and Intersection",
+    explanation: "Union means A or B or both. Intersection means A and B together.",
+    example: "Example: A = odd, B = 4 or less, then A ∩ B = {1, 3}",
+    extraExamples: [
+      "Example: A ∪ B = {1, 2, 3, 4, 5}",
     ],
   },
   {
@@ -181,7 +180,15 @@ export const introductionSlides: LectureSlide[] = [
     example: "Example: Not even -> {1, 3, 5}",
     extraExamples: [
       "Example: Not heads means tails.",
-      "Example: Not greater than 4 on a die means {1, 2, 3, 4}.",
+    ],
+  },
+  {
+    id: "omega-null",
+    topic: "Omega and Null Event",
+    explanation: "Omega is the whole sample space. Phi is the null event with no outcomes.",
+    example: "Example: Omega for a die is {1, 2, 3, 4, 5, 6}",
+    extraExamples: [
+      "Example: Phi = {} means impossible event.",
     ],
   },
   {
@@ -191,7 +198,24 @@ export const introductionSlides: LectureSlide[] = [
     example: "Example: Heads and tails are mutually exclusive and exhaustive for one fair coin.",
     extraExamples: [
       "Example: Rolling odd and even cannot happen together.",
-      "Example: On one die, odd or even covers every outcome.",
+    ],
+  },
+  {
+    id: "probability-models",
+    topic: "Probability Models",
+    explanation: "A probability model is a mathematical way to represent how outcomes are distributed.",
+    example: "Example: Births spread evenly through 12 months gives probability 3/12 for Jan-Mar.",
+    extraExamples: [
+      "Example: A model can be useful even if it is not perfectly exact.",
+    ],
+  },
+  {
+    id: "equivalence",
+    topic: "Equivalence of Approaches",
+    explanation: "Classical, empirical, and subjective approaches can sometimes describe the same probability.",
+    example: "Example: A fair die can be justified by symmetry, experiment, or belief.",
+    extraExamples: [
+      "Example: Different methods can still lead to the same probability value.",
     ],
   },
 ];
