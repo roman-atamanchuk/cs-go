@@ -3,6 +3,7 @@ export type LectureSlide = {
   topic: string;
   explanation: string;
   example: string;
+  extraExamples: string[];
 };
 
 export type QuizQuestion = {
@@ -14,78 +15,184 @@ export type QuizQuestion = {
   explanation: string;
 };
 
+export type SupportVideo = {
+  id: string;
+  number: number;
+  title: string;
+  duration: string;
+  sourceLabel: string;
+  sourceUrl: string;
+  embedUrl?: string;
+};
+
+export const introductionSupportVideos: SupportVideo[] = [
+  {
+    id: "support-1",
+    number: 1,
+    title: "Probability explained",
+    duration: "8:17",
+    sourceLabel: "Khan Academy YouTube",
+    sourceUrl: "https://www.youtube.com/watch?v=uzkc-qNVoOk&list=PLC58778F28211FA19&index=1",
+    embedUrl: "https://www.youtube.com/embed/uzkc-qNVoOk",
+  },
+  {
+    id: "support-2",
+    number: 2,
+    title: "Probability and sample spaces",
+    duration: "Playlist video 2",
+    sourceLabel: "Khan Academy YouTube",
+    sourceUrl: "https://www.youtube.com/watch?v=obZzOq_wSCg&list=PLC58778F28211FA19&index=2",
+    embedUrl: "https://www.youtube.com/embed/obZzOq_wSCg",
+  },
+  {
+    id: "support-3",
+    number: 3,
+    title: "Probability examples",
+    duration: "Playlist video 3",
+    sourceLabel: "Khan Academy YouTube",
+    sourceUrl: "https://www.youtube.com/watch?v=QE2uR6Z-NcU&list=PLC58778F28211FA19&index=3",
+    embedUrl: "https://www.youtube.com/embed/QE2uR6Z-NcU",
+  },
+  {
+    id: "support-4",
+    number: 4,
+    title: "Complementary events",
+    duration: "Duration not confirmed",
+    sourceLabel: "Khan Academy",
+    sourceUrl:
+      "https://www.khanacademy.org/math/class-12-bridge/x09646558c1ff0797%3Aadvanced-counting/x09646558c1ff0797%3Aprobability/v/complementary-events",
+  },
+  {
+    id: "support-5",
+    number: 5,
+    title: "Mutually exclusive and exhaustive events",
+    duration: "9:27",
+    sourceLabel: "Khan Academy",
+    sourceUrl:
+      "https://www.khanacademy.org/math/ka-math-class-11/x0419e5b3b578592a%3Aprobability-ncert-new/x0419e5b3b578592a%3Aalgebra-of-events/v/mutually-exclusive-and-exhaustive-events",
+  },
+];
+
 export const introductionSlides: LectureSlide[] = [
   {
     id: "uncertainty",
     topic: "Uncertainty",
     explanation: "Probability helps us measure how likely an uncertain event is.",
     example: "Example: Will it rain tomorrow?",
+    extraExamples: [
+      "Example: Will the next bus arrive in 5 minutes?",
+      "Example: Will a coin land on heads?",
+    ],
   },
   {
     id: "quantifying",
     topic: "Quantifying Probability",
     explanation: "The same chance can be written as a fraction, decimal, or percentage.",
     example: "Example: 1/6 = 0.167 = 16.7%",
+    extraExamples: [
+      "Example: 1/2 = 0.5 = 50%",
+      "Example: 3/4 = 0.75 = 75%",
+    ],
   },
   {
     id: "odds",
     topic: "Odds",
     explanation: "Odds compare favourable cases to unfavourable cases.",
     example: "Example: Getting a 3 on a die has odds 1 to 5.",
+    extraExamples: [
+      "Example: 1 head vs 1 tail gives odds 1 to 1.",
+      "Example: One ace vs 51 non-aces gives odds 1 to 51.",
+    ],
   },
   {
     id: "classical",
     topic: "Classical Probability",
     explanation: "Use this when all outcomes are equally favoured.",
     example: "Example: P(rolling a 3) = 1/6",
+    extraExamples: [
+      "Example: P(heads on a fair coin) = 1/2",
+      "Example: P(drawing a king from 52 cards) = 4/52",
+    ],
   },
   {
     id: "empirical",
     topic: "Empirical Probability",
     explanation: "Estimate probability from observed sample results.",
     example: "Example: 12 heads in 20 flips gives 12/20 = 0.6",
+    extraExamples: [
+      "Example: 7 rainy days in 10 days gives 0.7",
+      "Example: 18 red balls in 30 picks gives 0.6",
+    ],
   },
   {
     id: "relative-frequency",
     topic: "Relative Frequency",
     explanation: "As the sample gets larger, the estimate becomes more reliable.",
     example: "Example: More coin flips usually move closer to 50/50.",
+    extraExamples: [
+      "Example: 10 flips can be uneven, 1,000 flips are usually closer to half heads.",
+      "Example: More survey answers usually give a steadier estimate.",
+    ],
   },
   {
     id: "subjective",
     topic: "Subjective Probability",
     explanation: "Sometimes probability is a reasoned personal judgement.",
     example: "Example: A doctor estimates a treatment has 90% success.",
+    extraExamples: [
+      "Example: A coach believes a team has a strong chance to win.",
+      "Example: An investor judges a market rise as likely.",
+    ],
   },
   {
     id: "counting",
     topic: "Counting",
     explanation: "In classical probability, we count favourable outcomes and total outcomes.",
     example: "Example: Favourable / total",
+    extraExamples: [
+      "Example: 2 red marbles out of 5 gives 2/5.",
+      "Example: 3 even outcomes on a die gives 3/6.",
+    ],
   },
   {
     id: "sample-space",
     topic: "Sample Space",
     explanation: "The sample space is the set of all possible outcomes.",
     example: "Example: One coin flip -> {H, T}",
+    extraExamples: [
+      "Example: Die roll -> {1, 2, 3, 4, 5, 6}",
+      "Example: Two coin flips -> {HH, HT, TH, TT}",
+    ],
   },
   {
     id: "event",
     topic: "Event",
     explanation: "An event is one outcome or a group of outcomes.",
     example: "Example: Odd on a die -> {1, 3, 5}",
+    extraExamples: [
+      "Example: Rolling more than 4 -> {5, 6}",
+      "Example: Drawing a heart from cards.",
+    ],
   },
   {
     id: "complement",
     topic: "Complement",
     explanation: "The complement of A means A does not happen.",
     example: "Example: Not even -> {1, 3, 5}",
+    extraExamples: [
+      "Example: Not heads means tails.",
+      "Example: Not greater than 4 on a die means {1, 2, 3, 4}.",
+    ],
   },
   {
     id: "exclusive-exhaustive",
     topic: "Mutually Exclusive and Exhaustive",
     explanation: "Exclusive events cannot happen together; exhaustive events cover all outcomes.",
     example: "Example: Heads and tails are mutually exclusive and exhaustive for one fair coin.",
+    extraExamples: [
+      "Example: Rolling odd and even cannot happen together.",
+      "Example: On one die, odd or even covers every outcome.",
+    ],
   },
 ];
 

@@ -6,6 +6,7 @@ import {
   getShuffledQuizSubset,
   introductionQuestionBank,
   introductionSlides,
+  introductionSupportVideos,
   type QuizQuestion,
 } from "../data/introductionProbabilityContent";
 import {
@@ -22,8 +23,9 @@ export default function LectureVideoPlayer() {
   const { course, video } = getLectureVideo(lectureId, videoId);
 
   const isIntroductionLecture = video.id === "probability-statistics-video-01";
-  const [activeTopSection, setActiveTopSection] = useState<"slides" | "quiz">("slides");
+  const [activeTopSection, setActiveTopSection] = useState<"slides" | "quiz" | "videos">("slides");
   const [slidesApi, setSlidesApi] = useState<CarouselApi>();
+  const [activeSupportVideo, setActiveSupportVideo] = useState(0);
 
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>(() =>
     getShuffledQuizSubset(12),
@@ -34,6 +36,9 @@ export default function LectureVideoPlayer() {
   const quizScore = quizQuestions.filter(
     (question) => selectedAnswers[question.id] === question.correctAnswer,
   ).length;
+  const selectedSupportVideo = isIntroductionLecture
+    ? introductionSupportVideos[activeSupportVideo] ?? introductionSupportVideos[0]
+    : undefined;
 
   function resetQuiz() {
     setSelectedAnswers({});
@@ -116,6 +121,16 @@ export default function LectureVideoPlayer() {
                   >
                     Quiz
                   </button>
+                  <button
+                    onClick={() => setActiveTopSection("videos")}
+                    className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                      activeTopSection === "videos"
+                        ? "bg-white text-slate-900"
+                        : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
+                    }`}
+                  >
+                    Videos
+                  </button>
                 </div>
               </div>
 
@@ -132,14 +147,14 @@ export default function LectureVideoPlayer() {
                   <Carousel
                     setApi={setSlidesApi}
                     opts={{ align: "start", loop: false }}
-                    className="px-12 sm:px-16"
+                    className="px-12 sm:px-16 min-h-[72vh]"
                   >
                     <CarouselContent>
                       {introductionSlides.map((slide, index) => (
                         <CarouselItem key={slide.id} className="basis-full">
                           <article
                             onClick={() => slidesApi?.scrollNext()}
-                            className="min-h-[320px] cursor-pointer rounded-3xl bg-white p-8 shadow-sm flex flex-col justify-between"
+                            className="mx-auto flex min-h-[72vh] w-full max-w-3xl cursor-pointer flex-col justify-between rounded-3xl bg-white p-8 shadow-sm lg:aspect-square lg:min-h-0"
                           >
                             <div>
                               <p className="text-sm text-slate-500 mb-4">Slide {index + 1}</p>
@@ -147,8 +162,18 @@ export default function LectureVideoPlayer() {
                               <p className="text-lg leading-8 text-slate-700">{slide.explanation}</p>
                             </div>
 
-                            <div className="mt-6 rounded-2xl bg-blue-50 px-5 py-4 text-base text-blue-900 leading-7">
-                              {slide.example}
+                            <div className="mt-6 space-y-3">
+                              <div className="rounded-2xl bg-blue-50 px-5 py-4 text-base text-blue-900 leading-7">
+                                {slide.example}
+                              </div>
+                              {slide.extraExamples.map((example) => (
+                                <div
+                                  key={example}
+                                  className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-base text-slate-700 leading-7"
+                                >
+                                  {example}
+                                </div>
+                              ))}
                             </div>
                           </article>
                         </CarouselItem>
@@ -158,7 +183,7 @@ export default function LectureVideoPlayer() {
                     <CarouselNext className="right-0 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white" />
                   </Carousel>
                 </>
-              ) : (
+              ) : activeTopSection === "quiz" ? (
                 <>
                   <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                     <div>
@@ -280,48 +305,85 @@ export default function LectureVideoPlayer() {
                     <CarouselNext className="right-0 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white" />
                   </Carousel>
                 </>
+              ) : (
+                <>
+                  <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div>
+                      <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">Videos</p>
+                      <h3 className="text-2xl text-white tracking-tight">Recommended Video Set</h3>
+                    </div>
+                    <div className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-slate-200">
+                      {introductionSupportVideos.length} videos
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3 mb-5">
+                    {introductionSupportVideos.map((supportVideo, index) => (
+                      <button
+                        key={supportVideo.id}
+                        onClick={() => setActiveSupportVideo(index)}
+                        className={`inline-flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
+                          activeSupportVideo === index
+                            ? "bg-white text-slate-900"
+                            : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
+                        }`}
+                        aria-label={`Open video ${supportVideo.number}: ${supportVideo.title}`}
+                      >
+                        {supportVideo.number}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="overflow-hidden rounded-2xl border border-white/10 bg-black aspect-video relative">
+                    {selectedSupportVideo?.embedUrl ? (
+                      <iframe
+                        src={selectedSupportVideo.embedUrl}
+                        title={selectedSupportVideo.title}
+                        className="h-full w-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        allowFullScreen
+                      />
+                    ) : selectedSupportVideo ? (
+                      <div className="h-full w-full bg-slate-950 text-white p-8 flex flex-col justify-between">
+                        <div>
+                          <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-3">
+                            Video {selectedSupportVideo.number}
+                          </p>
+                          <h2 className="text-2xl font-semibold mb-4">{selectedSupportVideo.title}</h2>
+                          <p className="text-slate-300 leading-7 max-w-2xl">
+                            This lesson is part of your recommended study list. Open it from the source below
+                            to continue with the matching topic.
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-3">
+                          <a
+                            href={selectedSupportVideo.sourceUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-100"
+                          >
+                            Open {selectedSupportVideo.sourceLabel}
+                          </a>
+                          <div className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-slate-200">
+                            Duration: {selectedSupportVideo.duration}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center p-6">
+                        <div className="rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-medium text-white">
+                          Video is not connected yet
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
             </section>
           )}
 
-          <section className="rounded-2xl border border-white/10 bg-slate-950/70 p-5 backdrop-blur-sm shadow-2xl">
-            <div className="flex items-start justify-between gap-4 mb-5">
-              <div>
-                <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">{course.title}</p>
-                <h1 className="text-3xl text-white tracking-tight">{video.title}</h1>
-              </div>
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white">
-                <PlayCircle className="w-6 h-6" />
-              </div>
-            </div>
-
-            <div className="overflow-hidden rounded-2xl border border-white/10 bg-black aspect-video relative">
-              {video.embedUrl ? (
-                <iframe
-                  src={video.embedUrl}
-                  title={video.title}
-                  className="h-full w-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  allowFullScreen
-                />
-              ) : (
-                <>
-                  <img
-                    src={video.image}
-                    alt={video.title}
-                    className="h-full w-full object-cover opacity-85"
-                  />
-                  <div className="absolute inset-0 bg-slate-950/40" />
-                  <div className="absolute inset-0 flex items-center justify-center p-6">
-                    <div className="rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-medium text-white">
-                      Video link is not connected yet
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </section>
         </div>
       </div>
     </div>
