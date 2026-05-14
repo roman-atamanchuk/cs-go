@@ -394,7 +394,7 @@ export default function LectureVideoPlayer() {
 
       <div className="relative z-10 w-full">
         <Link
-          to={`/lectures/${course.id}`}
+          to="/lectures"
           className="mb-10 inline-flex items-center gap-2 text-slate-300 transition-colors hover:text-white"
         >
           <ArrowLeft className="w-4 h-4" />

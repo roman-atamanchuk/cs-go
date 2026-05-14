@@ -69,7 +69,7 @@ export default function Lectures() {
                 </div>
 
                 <Link
-                  to={`/lectures/${lecture.id}`}
+                  to={`/lectures/${lecture.id}/videos/${lecture.videoItems[0]?.id ?? ""}`}
                   className="w-full block bg-slate-800 hover:bg-slate-900 text-white py-2.5 rounded-lg transition-colors text-sm font-medium text-center"
                 >
                   Watch Lectures

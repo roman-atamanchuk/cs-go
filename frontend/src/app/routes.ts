@@ -4,7 +4,6 @@ import Dashboard from "./components/Dashboard";
 import ExamMode from "./components/ExamMode";
 import Lectures from "./components/Lectures";
 import LectureVideoPlayer from "./components/LectureVideoPlayer";
-import LectureVideos from "./components/LectureVideos";
 import ChooseExam from "./components/ChooseExam";
 import Study from "./components/Study";
 import Graph from "./components/Graph";
@@ -37,10 +36,6 @@ export const router = createBrowserRouter([
   {
     path: "/lectures",
     Component: Lectures,
-  },
-  {
-    path: "/lectures/:lectureId",
-    Component: LectureVideos,
   },
   {
     path: "/lectures/:lectureId/videos/:videoId",
