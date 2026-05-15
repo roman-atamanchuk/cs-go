@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { ArrowLeft, Play, BookOpen, Clock } from "lucide-react";
 import { lectureCourses } from "../data/lectureLibrary";
 
 export default function Lectures() {
   const [selectedSemester, setSelectedSemester] = useState(4);
+  const navigate = useNavigate();
 
   const getColorClasses = (color: string) => {
     const colors: Record<string, { bg: string; icon: string }> = {
@@ -58,7 +59,11 @@ export default function Lectures() {
             const colors = getColorClasses(lecture.color);
 
             return (
-              <div key={lecture.id} className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-200 border border-slate-100">
+              <div
+                key={lecture.id}
+                onClick={() => navigate(`/lectures/${lecture.id}/videos/${lecture.videoItems[0]?.id ?? ""}`)}
+                className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 border border-slate-100 cursor-pointer"
+              >
                 <div className="flex items-start justify-between mb-5">
                   <div className="flex-1">
                     <h2 className="text-lg mb-1 text-slate-900 font-medium">{lecture.title}</h2>
@@ -66,8 +71,9 @@ export default function Lectures() {
                   </div>
                   <a
                     href={lecture.pdfLink}
-                    download="01 Introduction to Probability.pdf"
+                    download={`${lecture.title}.pdf`}
                     aria-label={`Download PDF for ${lecture.title}`}
+                    onClick={(event) => event.stopPropagation()}
                     className={`${colors.bg} w-11 h-11 rounded-lg flex items-center justify-center shrink-0 ml-3 transition-transform hover:scale-105`}
                   >
                     <BookOpen className={`w-5 h-5 ${colors.icon}`} />
@@ -76,7 +82,7 @@ export default function Lectures() {
 
                 <p className="text-slate-600 mb-4 text-sm">Instructor: {lecture.instructor}</p>
 
-                <div className="flex gap-4 mb-5">
+                <div className="flex gap-4">
                   <div className="flex items-center gap-2 text-slate-600">
                     <Play className="w-4 h-4" />
                     <span className="text-sm">{lecture.videos} videos</span>
@@ -86,13 +92,6 @@ export default function Lectures() {
                     <span className="text-sm">{lecture.duration}</span>
                   </div>
                 </div>
-
-                <Link
-                  to={`/lectures/${lecture.id}/videos/${lecture.videoItems[0]?.id ?? ""}`}
-                  className="w-full block bg-slate-800 hover:bg-slate-900 text-white py-2.5 rounded-lg transition-colors text-sm font-medium text-center"
-                >
-                  Watch Lectures
-                </Link>
               </div>
             );
           })}

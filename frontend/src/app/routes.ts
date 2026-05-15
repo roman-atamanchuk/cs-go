@@ -1,10 +1,8 @@
 import { createElement } from "react";
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Navigate, useParams } from "react-router";
 import Dashboard from "./components/Dashboard";
-import ExamMode from "./components/ExamMode";
 import Lectures from "./components/Lectures";
 import LectureVideoPlayer from "./components/LectureVideoPlayer";
-import ChooseExam from "./components/ChooseExam";
 import Study from "./components/Study";
 import Graph from "./components/Graph";
 import BusinessProjects from "./components/BusinessProjects";
@@ -24,6 +22,22 @@ function placeholderRoute(title: string, badge: string, description: string) {
     });
 }
 
+function ExamModeRedirect() {
+  return createElement(Navigate, {
+    to: "/study/1/probability-statistics",
+    replace: true,
+  });
+}
+
+function ChooseLevelRedirect() {
+  const { examId } = useParams();
+
+  return createElement(Navigate, {
+    to: `/study/1/${examId ?? "probability-statistics"}`,
+    replace: true,
+  });
+}
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -31,7 +45,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/exam-mode",
-    Component: ExamMode,
+    Component: ExamModeRedirect,
   },
   {
     path: "/lectures",
@@ -43,7 +57,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/choose-level/:examId",
-    Component: ChooseExam,
+    Component: ChooseLevelRedirect,
   },
   {
     path: "/study/:level/:examId",

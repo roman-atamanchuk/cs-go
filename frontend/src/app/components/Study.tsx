@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useParams, useNavigate } from "react-router";
-import { ArrowLeft, Play } from "lucide-react";
+import { ArrowLeft, FileText, Play } from "lucide-react";
+import { getPastExamFileUrl } from "../data/lectureApi";
 
 export default function Study() {
   const { level, examId } = useParams();
@@ -16,9 +17,22 @@ export default function Study() {
   const [distance, setDistance] = useState(100);
   const [mass, setMass] = useState(75);
 
-  const years = [2020, 2021, 2022, 2023, 2024, 2025];
+  const years = [2022, 2023, 2024, 2025];
+  const pastExamFiles: Record<string, Partial<Record<number, { paper?: string; solutions?: string }>>> = {
+    "probability-statistics": {
+      2022: { paper: "2022-paper.doc" },
+      2023: { paper: "2023-paper.docx", solutions: "2023-solutions.docx" },
+      2024: { paper: "2024-paper.docx", solutions: "2024-solutions.docx" },
+      2025: { paper: "2025-paper.docx" },
+    },
+  };
   const totalQuestions = 12;
   const totalVideos = 4;
+  const selectedYearFiles = examId ? pastExamFiles[examId]?.[selectedYear] : undefined;
+  const paperUrl =
+    examId && selectedYearFiles?.paper ? getPastExamFileUrl(examId, selectedYearFiles.paper) : null;
+  const solutionsUrl =
+    examId && selectedYearFiles?.solutions ? getPastExamFileUrl(examId, selectedYearFiles.solutions) : null;
 
   const question = {
     text: "What is the time complexity of binary search algorithm?",
@@ -39,9 +53,9 @@ export default function Study() {
       <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-sm" />
       <div className="max-w-4xl mx-auto relative z-10">
         <div className="flex items-center justify-between mb-8">
-          <Link to={`/choose-level/${examId}`} className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors">
+          <Link to="/lectures" className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors">
             <ArrowLeft className="w-4 h-4" />
-            Back to Choose Level
+            Back
           </Link>
           <div className="flex items-center gap-3">
             <span className="text-slate-300 text-sm">Exam Year:</span>
@@ -59,6 +73,41 @@ export default function Study() {
                   {year}
                 </button>
               ))}
+            </div>
+            <div className="ml-2 flex gap-2">
+              {paperUrl ? (
+                <a
+                  href={paperUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-100"
+                >
+                  <FileText className="w-4 h-4" />
+                  Paper
+                </a>
+              ) : (
+                <span className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-sm font-medium text-slate-400">
+                  <FileText className="w-4 h-4" />
+                  No paper
+                </span>
+              )}
+
+              {solutionsUrl ? (
+                <a
+                  href={solutionsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-200"
+                >
+                  <FileText className="w-4 h-4" />
+                  Solutions
+                </a>
+              ) : (
+                <span className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-sm font-medium text-slate-400">
+                  <FileText className="w-4 h-4" />
+                  No solutions
+                </span>
+              )}
             </div>
           </div>
         </div>

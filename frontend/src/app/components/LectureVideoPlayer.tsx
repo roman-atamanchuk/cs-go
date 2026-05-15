@@ -21,17 +21,14 @@ import {
 } from "lucide-react";
 import { getLectureVideo } from "../data/lectureLibrary";
 import {
-  additionalProbabilityLectureExperiences,
+  getLectureContentUrl,
+} from "../data/lectureApi";
+import {
   getShuffledQuizSubsetFromBank,
-  introductionQuestionBank,
-  introductionSlides,
-  introductionSupportVideos,
-  probabilityRulesQuestionBank,
-  probabilityRulesSlides,
+  type LectureExperience,
   type LectureSlide,
-  probabilityRulesSupportVideos,
   type QuizQuestion,
-} from "../data/introductionProbabilityContent";
+} from "../data/lectureContentTypes";
 import {
   Carousel,
   CarouselContent,
@@ -1022,30 +1019,26 @@ function getSlideCueStyles(slideId: string) {
   return cueStyles[cueKey] ?? cueStyles.uncertainty;
 }
 
-function getLectureExperience(videoId: string) {
-  if (videoId === "probability-statistics-video-01") {
-    return {
-      slides: introductionSlides,
-      questionBank: introductionQuestionBank,
-      supportVideos: introductionSupportVideos,
-    };
+async function fetchLectureExperience(videoId: string): Promise<LectureExperience | null> {
+  const response = await fetch(getLectureContentUrl(videoId));
+
+  if (response.status === 404) {
+    return null;
   }
 
-  if (videoId === "probability-statistics-video-02") {
-    return {
-      slides: probabilityRulesSlides,
-      questionBank: probabilityRulesQuestionBank,
-      supportVideos: probabilityRulesSupportVideos,
-    };
+  if (!response.ok) {
+    throw new Error(`Failed to load lecture content for ${videoId}`);
   }
 
-  return additionalProbabilityLectureExperiences[videoId];
+  return (await response.json()) as LectureExperience;
 }
 
 export default function LectureVideoPlayer() {
   const { lectureId, videoId } = useParams();
   const { course, video } = getLectureVideo(lectureId, videoId);
-  const lectureExperience = getLectureExperience(video.id);
+  const [lectureExperience, setLectureExperience] = useState<LectureExperience | null>(null);
+  const [lectureLoading, setLectureLoading] = useState(true);
+  const [lectureLoadError, setLectureLoadError] = useState<string | null>(null);
   const lectureSlides = lectureExperience?.slides ?? [];
   const lectureQuestionBank = lectureExperience?.questionBank ?? [];
   const lectureSupportVideos = lectureExperience?.supportVideos ?? [];
@@ -1061,9 +1054,7 @@ export default function LectureVideoPlayer() {
   const [activeSupportVideo, setActiveSupportVideo] = useState(0);
   const quizQuestionCount = Math.min(12, lectureQuestionBank.length);
 
-  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>(() =>
-    getShuffledQuizSubsetFromBank(lectureQuestionBank, quizQuestionCount),
-  );
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
   const [quizApi, setQuizApi] = useState<CarouselApi>();
 
@@ -1127,14 +1118,56 @@ export default function LectureVideoPlayer() {
   }, [video.section]);
 
   useEffect(() => {
+    let cancelled = false;
+
+    async function loadLectureExperience() {
+      try {
+        setLectureLoading(true);
+        setLectureLoadError(null);
+        const nextExperience = await fetchLectureExperience(video.id);
+
+        if (!cancelled) {
+          setLectureExperience(nextExperience);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setLectureExperience(null);
+          setLectureLoadError(error instanceof Error ? error.message : "Failed to load lecture content.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLectureLoading(false);
+        }
+      }
+    }
+
+    loadLectureExperience();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [video.id]);
+
+  useEffect(() => {
     setActiveTopSection("slides");
     setActiveSupportVideo(0);
     setSelectedAnswers({});
     setActiveLectureSlide(1);
-    setQuizQuestions(getShuffledQuizSubsetFromBank(lectureQuestionBank, quizQuestionCount));
     quizApi?.scrollTo(0);
     slidesApi?.scrollTo(0);
-  }, [video.id, quizQuestionCount]);
+  }, [video.id]);
+
+  useEffect(() => {
+    setSelectedAnswers({});
+    setActiveLectureSlide(1);
+    quizApi?.scrollTo(0);
+    slidesApi?.scrollTo(0);
+    setQuizQuestions(
+      lectureQuestionBank.length > 0
+        ? getShuffledQuizSubsetFromBank(lectureQuestionBank, quizQuestionCount)
+        : [],
+    );
+  }, [lectureQuestionBank, quizQuestionCount]);
 
   return (
     <div className="min-h-screen relative p-6">
@@ -1149,7 +1182,15 @@ export default function LectureVideoPlayer() {
 
       <div className="relative z-10 w-full">
         <div className="w-full space-y-6">
-          {lectureExperience && (
+          {lectureLoading ? (
+            <section className="rounded-2xl border border-white/10 bg-slate-950/70 p-8 text-slate-200 backdrop-blur-sm shadow-2xl">
+              Loading lecture content...
+            </section>
+          ) : lectureLoadError ? (
+            <section className="rounded-2xl border border-rose-400/20 bg-slate-950/70 p-8 text-rose-100 backdrop-blur-sm shadow-2xl">
+              {lectureLoadError}
+            </section>
+          ) : lectureExperience ? (
             <section className="rounded-2xl border border-white/10 bg-slate-950/70 p-6 backdrop-blur-sm shadow-2xl">
               <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
                 <div className="min-w-0">
@@ -1172,7 +1213,7 @@ export default function LectureVideoPlayer() {
                             Learning Mode
                           </button>
                           <Link
-                            to="/exam-mode"
+                            to={`/study/1/${course.id}`}
                             className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/20"
                           >
                             Exam Mode
@@ -1295,7 +1336,7 @@ export default function LectureVideoPlayer() {
                           <h3 className="text-2xl text-white tracking-tight">Slide Quiz</h3>
                         </div>
                         <div className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-slate-200">
-                          12 shown from {lectureQuestionBank.length} questions
+                          {quizQuestionCount} shown from {lectureQuestionBank.length} questions
                         </div>
                       </div>
 
@@ -1384,7 +1425,7 @@ export default function LectureVideoPlayer() {
                                   Score: {quizScore} / {quizQuestions.length}
                                 </div>
                                 <p className="text-lg leading-8 text-slate-700">
-                                  This result is for the current 12-question slide set from the larger 100-question bank.
+                                  This result is for the current {quizQuestions.length}-question slide set from the larger lecture bank.
                                 </p>
                               </div>
 
@@ -1413,10 +1454,6 @@ export default function LectureVideoPlayer() {
                   ) : (
                     <>
                       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                        <div>
-                          <p className="text-sm uppercase tracking-[0.2em] text-blue-200 mb-2">Videos</p>
-                          <h3 className="text-2xl text-white tracking-tight">Recommended Video Set</h3>
-                        </div>
                         <div className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-slate-200">
                           {supportVideoProgressLabel}
                         </div>
@@ -1508,7 +1545,7 @@ export default function LectureVideoPlayer() {
                   <div className="space-y-3 xl:max-h-[650px] xl:overflow-y-auto xl:pr-1">
                     {lectureSidebarItems.map((lectureItem, index) => {
                       const isActive = activeLectureIndex === index;
-                      const hasLecturePage = Boolean(getLectureExperience(lectureItem.id));
+                      const hasLecturePage = lectureItem.id.startsWith("probability-statistics-video-");
                       const itemClasses = `flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition-colors ${
                         isActive ? "border-white/40 bg-white/15" : "border-white/10 bg-black/20 hover:bg-white/10"
                       }`;
@@ -1547,6 +1584,10 @@ export default function LectureVideoPlayer() {
                   </div>
                 </aside>
               </div>
+            </section>
+          ) : (
+            <section className="rounded-2xl border border-white/10 bg-slate-950/70 p-8 text-slate-200 backdrop-blur-sm shadow-2xl">
+              Lecture content for this page is still being prepared.
             </section>
           )}
 
