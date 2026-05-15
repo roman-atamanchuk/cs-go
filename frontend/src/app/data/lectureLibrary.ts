@@ -1,5 +1,31 @@
 import probabilityPdf from "@/imports/lectures/01-introduction-to-probability.pdf";
 import probabilityRulesPdf from "@/imports/lectures/02-probability-rules.pdf";
+import binomialDistributionPdf from "@/imports/lectures/03-binomial-distribution.pdf";
+import poissonDistributionPdf from "@/imports/lectures/04-poisson-distribution.pdf";
+import normalDistributionPdf from "@/imports/lectures/05-normal-distribution.pdf";
+import probabilityModelExamplePdf from "@/imports/lectures/06-probability-model-example.pdf";
+import bayesTheoremPdf from "@/imports/lectures/07-bayes-theorem.pdf";
+import independencePdf from "@/imports/lectures/08-independence.pdf";
+import countingPdf from "@/imports/lectures/09-counting.pdf";
+import probabilityCountingProblemsPdf from "@/imports/lectures/10-probability-and-counting-problems.pdf";
+import applicationsOfProbabilityPdf from "@/imports/lectures/11-applications-of-probability.pdf";
+import introductionToStatisticsPdf from "@/imports/lectures/12-introduction-to-statistics.pdf";
+import descriptiveStatisticsOneVariablePdf from "@/imports/lectures/13-descriptive-statistics-one-variable.pdf";
+import descriptiveStatisticsTwoVariablesPdf from "@/imports/lectures/14-descriptive-statistics-two-variables.pdf";
+import descriptiveStatisticsThreeVariablesPdf from "@/imports/lectures/15-descriptive-statistics-three-variables.pdf";
+import descriptiveStatisticsWithRPdf from "@/imports/lectures/16-descriptive-statistics-with-r.pdf";
+import inferenceTTestPdf from "@/imports/lectures/17-inference-the-t-test.pdf";
+import inferenceTTestContinuedPdf from "@/imports/lectures/18-inference-the-t-test-continued.pdf";
+import samplingPdf from "@/imports/lectures/19-sampling.pdf";
+import assumptionOfNormalityPdf from "@/imports/lectures/20-assumption-of-normality.pdf";
+import pValuesPdf from "@/imports/lectures/21-p-values.pdf";
+import pairedTTestPdf from "@/imports/lectures/22-paired-t-test.pdf";
+import anovaPdf from "@/imports/lectures/23-anova.pdf";
+import anovaAssumptionsPdf from "@/imports/lectures/24-anova-assumptions.pdf";
+import chiSquaredTestsPdf from "@/imports/lectures/25-chi-squared-tests.pdf";
+import correlationPdf from "@/imports/lectures/26-correlation.pdf";
+import simpleRegressionPdf from "@/imports/lectures/27-simple-regression.pdf";
+import confoundingPdf from "@/imports/lectures/28-confounding.pdf";
 import shot1 from "@/imports/Screenshot_2026-04-19_at_23.43.32.png";
 import shot2 from "@/imports/Screenshot_2026-04-19_at_23.47.10.png";
 import shot3 from "@/imports/Screenshot_2026-04-20_at_00.07.21.png";
@@ -92,32 +118,86 @@ export const lectureCourses: LectureCourse[] = [
         section: "Probability lectures",
         pdfLink: probabilityRulesPdf,
       },
-      { id: "probability-statistics-video-03", title: "03 Binomial distribution", image: shot3, section: "Probability lectures" },
-      { id: "probability-statistics-video-04", title: "04 Poisson distribution", image: shot4, section: "Probability lectures" },
-      { id: "probability-statistics-video-05", title: "05 Normal distribution", image: shot5, section: "Probability lectures" },
-      { id: "probability-statistics-video-06", title: "11 Left tail normal tables", image: shot6, section: "Probability lectures" },
-      { id: "probability-statistics-video-07", title: "06 Probability Models Example", image: shot7, section: "Probability lectures" },
-      { id: "probability-statistics-video-08", title: "07 Bayes Theorem", image: shot8, section: "Probability lectures" },
-      { id: "probability-statistics-video-09", title: "08 Independence", image: shot9, section: "Probability lectures" },
-      { id: "probability-statistics-video-10", title: "09 Counting", image: shot10, section: "Probability lectures" },
-      { id: "probability-statistics-video-11", title: "10 Probability and Counting problems", image: shot11, section: "Probability lectures" },
-      { id: "probability-statistics-video-12", title: "12 Introduction to statistics", image: shot12, section: "Statistics lectures" },
-      { id: "probability-statistics-video-13", title: "13 Descriptive Statistics - One variable", image: shot13, section: "Statistics lectures" },
-      { id: "probability-statistics-video-14", title: "14 Descriptive Statistics - Two variables", image: shot14, section: "Statistics lectures" },
-      { id: "probability-statistics-video-15", title: "15 Descriptive Statistics - Three variables", image: shot15, section: "Statistics lectures" },
-      { id: "probability-statistics-video-16", title: "16 Descriptive Statistics with R", image: shot1, section: "Statistics lectures" },
-      { id: "probability-statistics-video-17", title: "17 Inference - the t test", image: shot2, section: "Statistics lectures" },
-      { id: "probability-statistics-video-18", title: "18 Inference - the t test - continued", image: shot3, section: "Statistics lectures" },
-      { id: "probability-statistics-video-19", title: "19 Sampling", image: shot4, section: "Statistics lectures" },
-      { id: "probability-statistics-video-20", title: "20 Assumption of normality", image: shot5, section: "Statistics lectures" },
-      { id: "probability-statistics-video-21", title: "21 p values", image: shot6, section: "Statistics lectures" },
-      { id: "probability-statistics-video-22", title: "22 Paired t test", image: shot7, section: "Statistics lectures" },
-      { id: "probability-statistics-video-23", title: "23 ANOVA", image: shot8, section: "Statistics lectures" },
-      { id: "probability-statistics-video-24", title: "24 ANOVA assumptions", image: shot9, section: "Statistics lectures" },
-      { id: "probability-statistics-video-25", title: "25 Chi squared tests", image: shot10, section: "Statistics lectures" },
-      { id: "probability-statistics-video-26", title: "26 Correlation", image: shot11, section: "Statistics lectures" },
-      { id: "probability-statistics-video-27", title: "27 Simple Regression", image: shot12, section: "Statistics lectures" },
-      { id: "probability-statistics-video-28", title: "28 Confounding", image: shot13, section: "Statistics lectures" },
+      {
+        id: "probability-statistics-video-03",
+        title: "03 Binomial distribution",
+        image: shot3,
+        section: "Probability lectures",
+        pdfLink: binomialDistributionPdf,
+      },
+      {
+        id: "probability-statistics-video-04",
+        title: "04 Poisson distribution",
+        image: shot4,
+        section: "Probability lectures",
+        pdfLink: poissonDistributionPdf,
+      },
+      {
+        id: "probability-statistics-video-05",
+        title: "05 Normal distribution",
+        image: shot5,
+        section: "Probability lectures",
+        pdfLink: normalDistributionPdf,
+      },
+      {
+        id: "probability-statistics-video-06",
+        title: "11 Applications of probability",
+        image: shot6,
+        section: "Probability lectures",
+        pdfLink: applicationsOfProbabilityPdf,
+      },
+      {
+        id: "probability-statistics-video-07",
+        title: "06 Probability Model Example",
+        image: shot7,
+        section: "Probability lectures",
+        pdfLink: probabilityModelExamplePdf,
+      },
+      {
+        id: "probability-statistics-video-08",
+        title: "07 Bayes Theorem",
+        image: shot8,
+        section: "Probability lectures",
+        pdfLink: bayesTheoremPdf,
+      },
+      {
+        id: "probability-statistics-video-09",
+        title: "08 Independence",
+        image: shot9,
+        section: "Probability lectures",
+        pdfLink: independencePdf,
+      },
+      {
+        id: "probability-statistics-video-10",
+        title: "09 Counting",
+        image: shot10,
+        section: "Probability lectures",
+        pdfLink: countingPdf,
+      },
+      {
+        id: "probability-statistics-video-11",
+        title: "10 Probability and Counting problems",
+        image: shot11,
+        section: "Probability lectures",
+        pdfLink: probabilityCountingProblemsPdf,
+      },
+      { id: "probability-statistics-video-12", title: "12 Introduction to statistics", image: shot12, section: "Statistics lectures", pdfLink: introductionToStatisticsPdf },
+      { id: "probability-statistics-video-13", title: "13 Descriptive Statistics - One variable", image: shot13, section: "Statistics lectures", pdfLink: descriptiveStatisticsOneVariablePdf },
+      { id: "probability-statistics-video-14", title: "14 Descriptive Statistics - Two variables", image: shot14, section: "Statistics lectures", pdfLink: descriptiveStatisticsTwoVariablesPdf },
+      { id: "probability-statistics-video-15", title: "15 Descriptive Statistics - Three variables", image: shot15, section: "Statistics lectures", pdfLink: descriptiveStatisticsThreeVariablesPdf },
+      { id: "probability-statistics-video-16", title: "16 Descriptive Statistics with R", image: shot1, section: "Statistics lectures", pdfLink: descriptiveStatisticsWithRPdf },
+      { id: "probability-statistics-video-17", title: "17 Inference - the t test", image: shot2, section: "Statistics lectures", pdfLink: inferenceTTestPdf },
+      { id: "probability-statistics-video-18", title: "18 Inference - the t test - continued", image: shot3, section: "Statistics lectures", pdfLink: inferenceTTestContinuedPdf },
+      { id: "probability-statistics-video-19", title: "19 Sampling", image: shot4, section: "Statistics lectures", pdfLink: samplingPdf },
+      { id: "probability-statistics-video-20", title: "20 Assumption of normality", image: shot5, section: "Statistics lectures", pdfLink: assumptionOfNormalityPdf },
+      { id: "probability-statistics-video-21", title: "21 p values", image: shot6, section: "Statistics lectures", pdfLink: pValuesPdf },
+      { id: "probability-statistics-video-22", title: "22 Paired t test", image: shot7, section: "Statistics lectures", pdfLink: pairedTTestPdf },
+      { id: "probability-statistics-video-23", title: "23 ANOVA", image: shot8, section: "Statistics lectures", pdfLink: anovaPdf },
+      { id: "probability-statistics-video-24", title: "24 ANOVA assumptions", image: shot9, section: "Statistics lectures", pdfLink: anovaAssumptionsPdf },
+      { id: "probability-statistics-video-25", title: "25 Chi squared tests", image: shot10, section: "Statistics lectures", pdfLink: chiSquaredTestsPdf },
+      { id: "probability-statistics-video-26", title: "26 Correlation", image: shot11, section: "Statistics lectures", pdfLink: correlationPdf },
+      { id: "probability-statistics-video-27", title: "27 Simple Regression", image: shot12, section: "Statistics lectures", pdfLink: simpleRegressionPdf },
+      { id: "probability-statistics-video-28", title: "28 Confounding", image: shot13, section: "Statistics lectures", pdfLink: confoundingPdf },
     ],
   },
   {

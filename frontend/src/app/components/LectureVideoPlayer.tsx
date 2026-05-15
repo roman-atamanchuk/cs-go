@@ -21,12 +21,14 @@ import {
 } from "lucide-react";
 import { getLectureVideo } from "../data/lectureLibrary";
 import {
+  additionalProbabilityLectureExperiences,
   getShuffledQuizSubsetFromBank,
   introductionQuestionBank,
   introductionSlides,
   introductionSupportVideos,
   probabilityRulesQuestionBank,
   probabilityRulesSlides,
+  type LectureSlide,
   probabilityRulesSupportVideos,
   type QuizQuestion,
 } from "../data/introductionProbabilityContent";
@@ -57,7 +59,630 @@ function normalizeSlideId(slideId: string) {
   return slideId;
 }
 
-function SlideVisual({ slideId }: { slideId: string }) {
+function cleanExampleText(text: string) {
+  return text.replace(/^Example:\s*/i, "").trim();
+}
+
+function shortenText(text: string, maxLength: number) {
+  return text.length <= maxLength ? text : `${text.slice(0, maxLength - 1).trim()}…`;
+}
+
+function pickFallbackVisual(slide: LectureSlide) {
+  const content = `${slide.topic} ${slide.explanation} ${slide.example}`.toLowerCase();
+  const example = cleanExampleText(slide.example);
+
+  if (content.includes("binomial") || content.includes("successes") || content.includes("nck")) {
+    return {
+      icon: Dices,
+      title: "Binomial Model",
+      accent: "from-emerald-100 via-white to-lime-100",
+      badges: ["fixed n", "2 outcomes", "same p"],
+      stats: [
+        { label: "Model", value: "Bin(n, p)" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    };
+  }
+
+  if (
+    content.includes("poisson") ||
+    content.includes("lambda") ||
+    content.includes("arrival") ||
+    content.includes("inter-event")
+  ) {
+    return {
+      icon: Gauge,
+      title: "Poisson Count",
+      accent: "from-teal-100 via-white to-emerald-100",
+      badges: ["random events", "stable rate", "independent"],
+      stats: [
+        { label: "Parameter", value: "lambda" },
+        { label: "Formula", value: "P(X = k)" },
+      ],
+    };
+  }
+
+  if (
+    content.includes("normal") ||
+    content.includes("z-score") ||
+    content.includes("standard deviation") ||
+    content.includes("bell")
+  ) {
+    return {
+      icon: CirclePercent,
+      title: "Normal Curve",
+      accent: "from-sky-100 via-white to-cyan-100",
+      badges: ["continuous", "bell shape", "z-score"],
+      stats: [
+        { label: "Centre", value: "mean" },
+        { label: "Spread", value: "sd" },
+      ],
+    };
+  }
+
+  if (
+    content.includes("mean") ||
+    content.includes("median") ||
+    content.includes("mode") ||
+    content.includes("central tendency")
+  ) {
+    return {
+      icon: CirclePercent,
+      title: "Central Tendency",
+      accent: "from-sky-100 via-white to-indigo-100",
+      badges: ["mean", "median", "mode"],
+      stats: [
+        { label: "Goal", value: "typical value" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    };
+  }
+
+  if (
+    content.includes("range") ||
+    content.includes("quartile") ||
+    content.includes("interquartile") ||
+    content.includes("spread") ||
+    content.includes("variance")
+  ) {
+    return {
+      icon: Gauge,
+      title: "Spread Measure",
+      accent: "from-teal-100 via-white to-cyan-100",
+      badges: ["range", "IQR", "SD"],
+      stats: [
+        { label: "Question", value: "how variable?" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    };
+  }
+
+  if (
+    content.includes("anova assumptions") ||
+    content.includes("levene") ||
+    content.includes("homoscedasticity") ||
+    content.includes("equal variance")
+  ) {
+    return {
+      icon: Sigma,
+      title: "ANOVA Assumptions",
+      accent: "from-amber-100 via-white to-orange-100",
+      badges: ["normality", "equal variance", "independent"],
+      stats: [
+        { label: "Checks", value: "plots + tests" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    };
+  }
+
+  if (
+    content.includes("chi-squared") ||
+    content.includes("chi squared") ||
+    content.includes("contingency") ||
+    content.includes("expected count") ||
+    content.includes("observed count")
+  ) {
+    return {
+      icon: Shapes,
+      title: "Chi-Squared Table",
+      accent: "from-sky-100 via-white to-cyan-100",
+      badges: ["observed", "expected", "independence"],
+      stats: [
+        { label: "Data", value: "counts by category" },
+        { label: "Goal", value: "compare observed vs expected" },
+      ],
+    };
+  }
+
+  if (
+    content.includes("correlation") ||
+    content.includes("pearson") ||
+    content.includes("spearman") ||
+    content.includes("cor.test") ||
+    content.includes("scatterplot")
+  ) {
+    return {
+      icon: GitBranch,
+      title: "Correlation Pattern",
+      accent: "from-violet-100 via-white to-fuchsia-100",
+      badges: ["direction", "strength", "r"],
+      stats: [
+        { label: "Question", value: "how strongly do variables move together?" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    };
+  }
+
+  if (
+    content.includes("regression") ||
+    content.includes("slope") ||
+    content.includes("intercept") ||
+    content.includes("residual") ||
+    content.includes("prediction")
+  ) {
+    return {
+      icon: Target,
+      title: "Regression Line",
+      accent: "from-emerald-100 via-white to-teal-100",
+      badges: ["fit line", "predict", "residuals"],
+      stats: [
+        { label: "Model", value: "y = a + bx" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    };
+  }
+
+  if (
+    content.includes("association") ||
+    content.includes("scatter") ||
+    content.includes("boxplot") ||
+    content.includes("clustered") ||
+    content.includes("chi-squared") ||
+    content.includes("anova")
+  ) {
+    return {
+      icon: GitBranch,
+      title: "Association Map",
+      accent: "from-violet-100 via-white to-fuchsia-100",
+      badges: ["variables", "chart", "test"],
+      stats: [
+        { label: "Aim", value: "see a relationship" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    };
+  }
+
+  if (
+    content.includes("read.table") ||
+    content.includes("dataframe") ||
+    content.includes("attach(") ||
+    content.includes("barplot") ||
+    content.includes("hist(") ||
+    content.includes("clipboard")
+  ) {
+    return {
+      icon: FileQuestion,
+      title: "R Workflow",
+      accent: "from-slate-100 via-white to-blue-100",
+      badges: ["load", "inspect", "summarise"],
+      stats: [
+        { label: "Tool", value: "R commands" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    };
+  }
+
+  if (
+    content.includes("t test") ||
+    content.includes("t.test") ||
+    content.includes("confidence interval") ||
+    content.includes("null hypothesis") ||
+    content.includes("type i")
+  ) {
+    return {
+      icon: Target,
+      title: "Inference Check",
+      accent: "from-rose-100 via-white to-orange-100",
+      badges: ["H0", "interval", "decision"],
+      stats: [
+        { label: "Question", value: "do means differ?" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    };
+  }
+
+  if (
+    content.includes("normality") ||
+    content.includes("shapiro") ||
+    content.includes("qqnorm") ||
+    content.includes("normal distribution")
+  ) {
+    return {
+      icon: Gauge,
+      title: "Normality Check",
+      accent: "from-cyan-100 via-white to-sky-100",
+      badges: ["shapiro", "qq plot", "assumption"],
+      stats: [
+        { label: "Decision", value: "want p ≥ 0.05" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    };
+  }
+
+  if (content.includes("p value") || content.includes("p-value") || content.includes("significance level")) {
+    return {
+      icon: CirclePercent,
+      title: "Evidence Scale",
+      accent: "from-violet-100 via-white to-indigo-100",
+      badges: ["p", "evidence", "0.05"],
+      stats: [
+        { label: "Smaller p", value: "stronger evidence" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    };
+  }
+
+  if (content.includes("anova") || content.includes("tukey") || content.includes("pr(>f)") || content.includes("as.factor")) {
+    return {
+      icon: Sigma,
+      title: "ANOVA Decision",
+      accent: "from-amber-100 via-white to-yellow-100",
+      badges: ["3+ groups", "F test", "tukey"],
+      stats: [
+        { label: "Question", value: "which means differ?" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    };
+  }
+
+  if (
+    content.includes("sampling") ||
+    content.includes("srs") ||
+    content.includes("stratified") ||
+    content.includes("systematic") ||
+    content.includes("quota") ||
+    content.includes("probability sampling")
+  ) {
+    return {
+      icon: Shapes,
+      title: "Sampling Plan",
+      accent: "from-emerald-100 via-white to-teal-100",
+      badges: ["sample", "population", "bias"],
+      stats: [
+        { label: "Aim", value: "valid inference" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    };
+  }
+
+  if (
+    content.includes("confounding") ||
+    content.includes("bubble plot") ||
+    content.includes("3d") ||
+    content.includes("three variables")
+  ) {
+    return {
+      icon: Shapes,
+      title: "Confounding Check",
+      accent: "from-amber-100 via-white to-orange-100",
+      badges: ["third variable", "confounding", "compare"],
+      stats: [
+        { label: "Purpose", value: "separate hidden effects" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    };
+  }
+
+  if (
+    content.includes("bayes") ||
+    content.includes("conditional") ||
+    content.includes("given ") ||
+    content.includes("a | b")
+  ) {
+    return {
+      icon: GitBranch,
+      title: "Conditional View",
+      accent: "from-amber-100 via-white to-yellow-100",
+      badges: ["given B", "new denominator", "update"],
+      stats: [
+        { label: "Notation", value: "P(A|B)" },
+        { label: "Warning", value: "A|B ≠ B|A" },
+      ],
+    };
+  }
+
+  if (content.includes("independent") || content.includes("product rule")) {
+    return {
+      icon: ShieldQuestion,
+      title: "Independence Check",
+      accent: "from-violet-100 via-white to-fuchsia-100",
+      badges: ["no change", "given B", "joint rule"],
+      stats: [
+        { label: "Rule", value: "P(A|B)=P(A)" },
+        { label: "Joint", value: "P(A∩B)=P(A)P(B)" },
+      ],
+    };
+  }
+
+  if (
+    content.includes("queue") ||
+    content.includes("rho") ||
+    content.includes("lq") ||
+    content.includes("wq") ||
+    content.includes("arrival rate") ||
+    content.includes("service")
+  ) {
+    return {
+      icon: Gauge,
+      title: "Queue Model",
+      accent: "from-cyan-100 via-white to-teal-100",
+      badges: ["lambda", "mu", "waiting"],
+      stats: [
+        { label: "Busy time", value: "rho" },
+        { label: "Queue stats", value: "Lq / Wq" },
+      ],
+    };
+  }
+
+  if (content.includes("reliability") || content.includes("series") || content.includes("parallel")) {
+    return {
+      icon: ShieldQuestion,
+      title: "Reliability System",
+      accent: "from-indigo-100 via-white to-sky-100",
+      badges: ["series", "parallel", "backup"],
+      stats: [
+        { label: "Series", value: "multiply R" },
+        { label: "Parallel", value: "1 - failures" },
+      ],
+    };
+  }
+
+  if (content.includes("control chart") || content.includes("out-of-control") || content.includes("spc")) {
+    return {
+      icon: Target,
+      title: "Control Chart",
+      accent: "from-rose-100 via-white to-orange-100",
+      badges: ["CL", "UCL/LCL", "signal"],
+      stats: [
+        { label: "Limits", value: "±3 SD" },
+        { label: "Goal", value: "detect shift" },
+      ],
+    };
+  }
+
+  if (content.includes("permutation") || content.includes("combination") || content.includes("counting")) {
+    return {
+      icon: Dices,
+      title: "Counting Method",
+      accent: "from-slate-100 via-white to-zinc-100",
+      badges: ["order?", "repetition?", "cases"],
+      stats: [
+        { label: "Permutation", value: "nPk" },
+        { label: "Combination", value: "nCk" },
+      ],
+    };
+  }
+
+  if (content.includes("cafe") || content.includes("customers") || content.includes("spend")) {
+    return {
+      icon: Sparkles,
+      title: "Model Choice",
+      accent: "from-purple-100 via-white to-pink-100",
+      badges: ["Poisson", "Binomial", "Normal"],
+      stats: [
+        { label: "Task", value: "pick model" },
+        { label: "Context", value: "cafe example" },
+      ],
+    };
+  }
+
+  if (content.includes("formula") || content.includes("probability") || content.includes("z =")) {
+    return {
+      icon: Sigma,
+      title: "Key Rule",
+      accent: "from-sky-100 via-white to-cyan-100",
+      badges: [shortenText(slide.topic, 18), "rule", "use"],
+      stats: [
+        { label: "Topic", value: shortenText(slide.topic, 48) },
+        { label: "Use", value: shortenText(example, 56) },
+      ],
+    };
+  }
+
+  return {
+    icon: Sparkles,
+    title: slide.topic,
+    accent: "from-slate-100 via-white to-blue-100",
+    badges: [shortenText(slide.topic, 18), "lecture", "example"],
+    stats: [
+      { label: "Topic", value: shortenText(slide.topic, 48) },
+      { label: "Example", value: shortenText(example, 56) },
+    ],
+  };
+}
+
+function buildSlideSummary(slide: LectureSlide, normalizedKey: string) {
+  const example = cleanExampleText(slide.example);
+  const firstExtra = slide.extraExamples[0] ? cleanExampleText(slide.extraExamples[0]) : "";
+  const fallbackVisual = pickFallbackVisual(slide);
+
+  const summaries: Record<
+    string,
+    { title: string; badges: string[]; stats: { label: string; value: string }[] }
+  > = {
+    uncertainty: {
+      title: slide.topic,
+      badges: ["uncertain", "outcome", "chance"],
+      stats: [
+        { label: "Core idea", value: "measure uncertainty" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    },
+    quantifying: {
+      title: slide.topic,
+      badges: ["fraction", "decimal", "percent"],
+      stats: [
+        { label: "Core idea", value: "same chance, different forms" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    },
+    odds: {
+      title: slide.topic,
+      badges: ["favourable", "unfavourable", "ratio"],
+      stats: [
+        { label: "Meaning", value: "compare success to failure" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    },
+    classical: {
+      title: slide.topic,
+      badges: ["fair model", "equally likely", "fav/total"],
+      stats: [
+        { label: "Rule", value: "favourable / total" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    },
+    empirical: {
+      title: slide.topic,
+      badges: ["sample", "observed", "estimate"],
+      stats: [
+        { label: "Built from", value: "data and counts" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    },
+    "relative-frequency": {
+      title: slide.topic,
+      badges: ["large N", "long run", "stabilises"],
+      stats: [
+        { label: "Trend", value: "more data, steadier rate" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    },
+    subjective: {
+      title: slide.topic,
+      badges: ["belief", "judgement", "one-off"],
+      stats: [
+        { label: "Used for", value: "expert estimates" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    },
+    counting: {
+      title: slide.topic,
+      badges: ["count", "arrange", "divide"],
+      stats: [
+        { label: "Purpose", value: "count before probability" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    },
+    "sample-space": {
+      title: slide.topic,
+      badges: ["outcomes", "set", "list"],
+      stats: [
+        { label: "Meaning", value: "all possible outcomes" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    },
+    event: {
+      title: slide.topic,
+      badges: ["subset", "simple", "compound"],
+      stats: [
+        { label: "Meaning", value: "chosen outcomes" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    },
+    complement: {
+      title: slide.topic,
+      badges: ["not A", "opposite", "remaining"],
+      stats: [
+        { label: "Meaning", value: "event does not happen" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    },
+    "exclusive-exhaustive": {
+      title: slide.topic,
+      badges: ["cannot overlap", "cover all", "partition"],
+      stats: [
+        { label: "Exclusive", value: "not together" },
+        { label: "Exhaustive", value: "all cases included" },
+      ],
+    },
+    "union-intersection": {
+      title: slide.topic,
+      badges: ["A or B", "A and B", "overlap"],
+      stats: [
+        { label: "Union", value: "or / both" },
+        { label: "Intersection", value: "together" },
+      ],
+    },
+    "omega-null": {
+      title: slide.topic,
+      badges: ["whole space", "empty set", "impossible"],
+      stats: [
+        { label: "Omega", value: "all outcomes" },
+        { label: "Phi", value: "no outcomes" },
+      ],
+    },
+    "probability-models": {
+      title: slide.topic,
+      badges: ["model", "outcomes", "probabilities"],
+      stats: [
+        { label: "Purpose", value: "represent uncertainty" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    },
+    equivalence: {
+      title: slide.topic,
+      badges: ["classical", "empirical", "subjective"],
+      stats: [
+        { label: "Idea", value: "different routes, same chance" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    },
+    "de-morgan": {
+      title: slide.topic,
+      badges: ["not(A or B)", "not(A and B)", "venn"],
+      stats: [
+        { label: "Rule use", value: "rewrite complements" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    },
+    "total-probability": {
+      title: slide.topic,
+      badges: ["split cases", "sum parts", "partition"],
+      stats: [
+        { label: "Idea", value: "break and add" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    },
+    "conditional-probability": {
+      title: slide.topic,
+      badges: ["given", "restricted set", "ratio"],
+      stats: [
+        { label: "Notation", value: "P(A|B)" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    },
+    "order-warning": {
+      title: slide.topic,
+      badges: ["A|B", "B|A", "different"],
+      stats: [
+        { label: "Warning", value: "conditioning direction matters" },
+        { label: "Example", value: shortenText(example, 56) },
+      ],
+    },
+  };
+
+  return (
+    summaries[normalizedKey] ?? {
+      title: fallbackVisual.title,
+      badges: fallbackVisual.badges,
+      stats: fallbackVisual.stats,
+    }
+  );
+}
+
+function SlideVisual({ slide }: { slide: LectureSlide }) {
+  const slideId = slide.id;
   const visualMap = {
     uncertainty: {
       icon: ShieldQuestion,
@@ -222,15 +847,24 @@ function SlideVisual({ slideId }: { slideId: string }) {
   } as const;
 
   const visualKey = normalizeSlideId(slideId) as keyof typeof visualMap;
-  const visual = visualMap[visualKey] ?? visualMap.uncertainty;
-  const Icon = visual.icon;
+  const visual = visualMap[visualKey];
+  const fallback = pickFallbackVisual(slide);
+  const summary = buildSlideSummary(slide, visualKey);
+  const resolvedVisual = {
+    icon: visual?.icon ?? fallback.icon,
+    accent: visual?.accent ?? fallback.accent,
+    title: summary.title,
+    badges: summary.badges,
+    stats: summary.stats,
+  };
+  const Icon = resolvedVisual.icon;
 
   return (
-    <div className={`rounded-3xl border border-slate-200 bg-gradient-to-br ${visual.accent} p-6`}>
+    <div className={`rounded-3xl border border-slate-200 bg-gradient-to-br ${resolvedVisual.accent} p-6`}>
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-slate-500 mb-2">Visual summary</p>
-          <h4 className="text-xl font-semibold text-slate-900">{visual.title}</h4>
+          <h4 className="text-xl font-semibold text-slate-900">{resolvedVisual.title}</h4>
         </div>
         <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/80 text-slate-900 shadow-sm">
           <Icon className="h-7 w-7" />
@@ -238,7 +872,7 @@ function SlideVisual({ slideId }: { slideId: string }) {
       </div>
 
       <div className="mt-5 flex flex-wrap gap-2">
-        {visual.badges.map((badge) => (
+        {resolvedVisual.badges.map((badge) => (
           <div
             key={badge}
             className="rounded-full border border-white/70 bg-white/80 px-3 py-1.5 text-sm font-medium text-slate-700"
@@ -249,7 +883,7 @@ function SlideVisual({ slideId }: { slideId: string }) {
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-3">
-        {visual.stats.map((stat) => (
+        {resolvedVisual.stats.map((stat) => (
           <div key={stat.label} className="rounded-2xl bg-white/80 px-4 py-3">
             <p className="text-xs uppercase tracking-[0.18em] text-slate-500 mb-1">{stat.label}</p>
             <p className="text-lg font-semibold text-slate-900">{stat.value}</p>
@@ -405,7 +1039,7 @@ function getLectureExperience(videoId: string) {
     };
   }
 
-  return undefined;
+  return additionalProbabilityLectureExperiences[videoId];
 }
 
 export default function LectureVideoPlayer() {
@@ -425,9 +1059,10 @@ export default function LectureVideoPlayer() {
   const [slidesApi, setSlidesApi] = useState<CarouselApi>();
   const [activeLectureSlide, setActiveLectureSlide] = useState(1);
   const [activeSupportVideo, setActiveSupportVideo] = useState(0);
+  const quizQuestionCount = Math.min(12, lectureQuestionBank.length);
 
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>(() =>
-    getShuffledQuizSubsetFromBank(lectureQuestionBank, 12),
+    getShuffledQuizSubsetFromBank(lectureQuestionBank, quizQuestionCount),
   );
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
   const [quizApi, setQuizApi] = useState<CarouselApi>();
@@ -436,16 +1071,18 @@ export default function LectureVideoPlayer() {
     (question) => selectedAnswers[question.id] === question.correctAnswer,
   ).length;
   const selectedSupportVideo = lectureSupportVideos[activeSupportVideo] ?? lectureSupportVideos[0];
+  const supportVideoProgressLabel =
+    lectureSupportVideos.length > 0 ? `${activeSupportVideo + 1}/${lectureSupportVideos.length}` : "0/0";
 
   function resetQuiz() {
     setSelectedAnswers({});
-    setQuizQuestions(getShuffledQuizSubsetFromBank(lectureQuestionBank, 12));
+    setQuizQuestions(getShuffledQuizSubsetFromBank(lectureQuestionBank, quizQuestionCount));
     quizApi?.scrollTo(0);
   }
 
   function loadNewQuizSet() {
     setSelectedAnswers({});
-    setQuizQuestions(getShuffledQuizSubsetFromBank(lectureQuestionBank, 12));
+    setQuizQuestions(getShuffledQuizSubsetFromBank(lectureQuestionBank, quizQuestionCount));
     quizApi?.scrollTo(0);
   }
 
@@ -494,10 +1131,10 @@ export default function LectureVideoPlayer() {
     setActiveSupportVideo(0);
     setSelectedAnswers({});
     setActiveLectureSlide(1);
-    setQuizQuestions(getShuffledQuizSubsetFromBank(lectureQuestionBank, 12));
+    setQuizQuestions(getShuffledQuizSubsetFromBank(lectureQuestionBank, quizQuestionCount));
     quizApi?.scrollTo(0);
     slidesApi?.scrollTo(0);
-  }, [video.id]);
+  }, [video.id, quizQuestionCount]);
 
   return (
     <div className="min-h-screen relative p-6">
@@ -620,7 +1257,7 @@ export default function LectureVideoPlayer() {
                                     </div>
 
                                     <div className="mt-4 space-y-4">
-                                      <SlideVisual slideId={slide.id} />
+                                      <SlideVisual slide={slide} />
                                       <div
                                         className={`rounded-2xl border-l-4 px-5 py-4 leading-7 ${cueStyles.example}`}
                                       >
@@ -781,7 +1418,7 @@ export default function LectureVideoPlayer() {
                           <h3 className="text-2xl text-white tracking-tight">Recommended Video Set</h3>
                         </div>
                         <div className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-slate-200">
-                          {activeSupportVideo + 1}/{lectureSupportVideos.length}
+                          {supportVideoProgressLabel}
                         </div>
                       </div>
 
