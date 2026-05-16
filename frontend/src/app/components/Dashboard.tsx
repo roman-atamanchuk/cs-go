@@ -57,6 +57,7 @@ export default function Dashboard() {
         style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1648737851199-585cfd98c13a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920)' }}
       />
       <div className="absolute inset-0 bg-slate-900/88 backdrop-blur-sm" />
+      <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-slate-950/55 via-slate-950/25 to-transparent blur-sm" />
       <div className="max-w-5xl w-full relative z-10">
         <div className="flex justify-between mb-10 flex-wrap gap-3">
           <div className="flex gap-2 flex-wrap">
