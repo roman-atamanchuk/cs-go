@@ -1,5 +1,146 @@
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
-import { ArrowLeft, Users, Trophy, Code, Music, Palette, Dumbbell } from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
+import { ArrowLeft, Users, Trophy, Code, Music, Palette, Dumbbell, ChevronLeft, ChevronRight } from "lucide-react";
+
+type Team = {
+  id: number;
+  name: string;
+  category: string;
+  members: number;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+  description: string;
+};
+
+function TeamSlider({
+  title,
+  teams,
+  getColorClasses,
+}: {
+  title: string;
+  teams: Team[];
+  getColorClasses: (color: string) => { bg: string; icon: string; badge: string };
+}) {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: "start" });
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const scrollPrev = useCallback(() => {
+    if (!emblaApi) return;
+    const current = emblaApi.selectedScrollSnap();
+    if (current <= 0) {
+      emblaApi.scrollTo(teams.length - 1);
+      return;
+    }
+    emblaApi.scrollPrev();
+  }, [emblaApi, teams.length]);
+
+  const scrollNext = useCallback(() => {
+    if (!emblaApi) return;
+    const current = emblaApi.selectedScrollSnap();
+    if (current >= teams.length - 1) {
+      emblaApi.scrollTo(0);
+      return;
+    }
+    emblaApi.scrollNext();
+  }, [emblaApi, teams.length]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    const onSelect = () => setActiveIndex(emblaApi.selectedScrollSnap());
+    onSelect();
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+
+    return () => {
+      emblaApi.off("select", onSelect);
+      emblaApi.off("reInit", onSelect);
+    };
+  }, [emblaApi]);
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-white text-lg font-medium tracking-tight">{title}</h2>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={scrollPrev}
+            className="w-9 h-9 rounded-lg border border-slate-600/70 bg-slate-800/65 text-slate-200 hover:text-white hover:bg-slate-700/80 transition-colors flex items-center justify-center"
+            aria-label={`Previous slide in ${title}`}
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={scrollNext}
+            className="w-9 h-9 rounded-lg border border-slate-600/70 bg-slate-800/65 text-slate-200 hover:text-white hover:bg-slate-700/80 transition-colors flex items-center justify-center"
+            aria-label={`Next slide in ${title}`}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+          <span className="text-xs text-slate-300 px-2 py-1 rounded-full bg-slate-700/60 border border-slate-600/60">
+            {activeIndex + 1}/{teams.length}
+          </span>
+        </div>
+      </div>
+
+      <div
+        className="overflow-hidden cursor-pointer"
+        ref={emblaRef}
+        onClick={scrollNext}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            scrollNext();
+          }
+        }}
+        aria-label={`${title} slider`}
+      >
+        <div className="flex gap-5">
+          {teams.map((team) => {
+            const colors = getColorClasses(team.color);
+            const Icon = team.icon;
+
+            return (
+              <div key={team.id} className="min-w-0 shrink-0 grow-0 basis-full">
+                <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-200 border border-slate-100">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`${colors.bg} w-11 h-11 rounded-lg flex items-center justify-center shrink-0`}>
+                      <Icon className={`w-5 h-5 ${colors.icon}`} />
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-md text-xs ${colors.badge}`}>
+                      {team.category}
+                    </span>
+                  </div>
+
+                  <h3 className="text-lg mb-2 text-slate-900 font-medium">{team.name}</h3>
+                  <p className="text-slate-600 mb-5 text-sm leading-relaxed">{team.description}</p>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+                    <div className="flex items-center gap-2 text-slate-600">
+                      <Users className="w-4 h-4" />
+                      <span className="text-sm">{team.members} members</span>
+                    </div>
+                    <button
+                      className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg transition-colors text-sm font-medium"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      Join Team
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function JoinTeam() {
   const teams = [
@@ -71,6 +212,12 @@ export default function JoinTeam() {
     return colors[color] || colors.blue;
   };
 
+  const sliderGroups = [
+    { title: "Code & Competition", teams: teams.slice(0, 2) },
+    { title: "Creative Campus", teams: teams.slice(2, 4) },
+    { title: "Wellness & Leadership", teams: teams.slice(4, 6) },
+  ];
+
   return (
     <div className="min-h-screen relative p-6">
       <div
@@ -90,37 +237,15 @@ export default function JoinTeam() {
           <p className="text-slate-300">Find your community and connect with like-minded students</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-5">
-          {teams.map((team) => {
-            const colors = getColorClasses(team.color);
-            const Icon = team.icon;
-
-            return (
-              <div key={team.id} className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-200 border border-slate-100">
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`${colors.bg} w-11 h-11 rounded-lg flex items-center justify-center shrink-0`}>
-                    <Icon className={`w-5 h-5 ${colors.icon}`} />
-                  </div>
-                  <span className={`px-2.5 py-1 rounded-md text-xs ${colors.badge}`}>
-                    {team.category}
-                  </span>
-                </div>
-
-                <h2 className="text-lg mb-2 text-slate-900 font-medium">{team.name}</h2>
-                <p className="text-slate-600 mb-5 text-sm leading-relaxed">{team.description}</p>
-
-                <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-                  <div className="flex items-center gap-2 text-slate-600">
-                    <Users className="w-4 h-4" />
-                    <span className="text-sm">{team.members} members</span>
-                  </div>
-                  <button className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg transition-colors text-sm font-medium">
-                    Join Team
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+        <div className="space-y-7">
+          {sliderGroups.map((group) => (
+            <TeamSlider
+              key={group.title}
+              title={group.title}
+              teams={group.teams}
+              getColorClasses={getColorClasses}
+            />
+          ))}
         </div>
       </div>
     </div>

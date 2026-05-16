@@ -1036,6 +1036,11 @@ async function fetchLectureExperience(videoId: string): Promise<LectureExperienc
 export default function LectureVideoPlayer() {
   const { lectureId, videoId } = useParams();
   const { course, video } = getLectureVideo(lectureId, videoId);
+  const defaultTopSection: "slides" | "quiz" | "videos" = course.title
+    .toLowerCase()
+    .includes("probability and statistics")
+    ? "videos"
+    : "slides";
   const [lectureExperience, setLectureExperience] = useState<LectureExperience | null>(null);
   const [lectureLoading, setLectureLoading] = useState(true);
   const [lectureLoadError, setLectureLoadError] = useState<string | null>(null);
@@ -1048,7 +1053,7 @@ export default function LectureVideoPlayer() {
   );
   const lectureSidebarItems = course.videoItems.filter((item) => item.section === activeLectureSection);
   const activeLectureIndex = lectureSidebarItems.findIndex((item) => item.id === video.id);
-  const [activeTopSection, setActiveTopSection] = useState<"slides" | "quiz" | "videos">("slides");
+  const [activeTopSection, setActiveTopSection] = useState<"slides" | "quiz" | "videos">(defaultTopSection);
   const [slidesApi, setSlidesApi] = useState<CarouselApi>();
   const [activeLectureSlide, setActiveLectureSlide] = useState(1);
   const [activeSupportVideo, setActiveSupportVideo] = useState(0);
@@ -1149,13 +1154,13 @@ export default function LectureVideoPlayer() {
   }, [video.id]);
 
   useEffect(() => {
-    setActiveTopSection("slides");
+    setActiveTopSection(defaultTopSection);
     setActiveSupportVideo(0);
     setSelectedAnswers({});
     setActiveLectureSlide(1);
     quizApi?.scrollTo(0);
     slidesApi?.scrollTo(0);
-  }, [video.id]);
+  }, [video.id, defaultTopSection]);
 
   useEffect(() => {
     setSelectedAnswers({});

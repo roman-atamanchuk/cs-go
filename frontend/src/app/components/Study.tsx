@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
-import { ArrowLeft, CheckCircle2, Download, FileText } from "lucide-react";
+import { ArrowLeft, Download, FileText } from "lucide-react";
 import { getPastExamFileUrl } from "../data/lectureApi";
 import { getLectureCourse } from "../data/lectureLibrary";
 import {
@@ -39,6 +39,23 @@ type ExamQuestion = {
   solutions: ExamSlide[];
   theory: ExamSlide[];
   examples: ExamSlide[];
+};
+
+type StepSlide = {
+  id: string;
+  title: string;
+  body: string;
+  table?: {
+    headers: string[];
+    rows: Array<{
+      label: string;
+      values: string[];
+    }>;
+  };
+  sections?: Array<{
+    title: string;
+    items: string[];
+  }>;
 };
 
 const examQuestionBank: Record<string, ExamQuestion> = {
@@ -823,9 +840,8 @@ export default function Study() {
 
   const [selectedYear, setSelectedYear] = useState(2023);
   const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [slidesApi, setSlidesApi] = useState<CarouselApi>();
-  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const [stepApi, setStepApi] = useState<CarouselApi>();
+  const [activeStepIndex, setActiveStepIndex] = useState(0);
 
   const pastExamFiles: Record<string, Partial<Record<number, { paper?: string; solutions?: string }>>> = {
     "probability-statistics": {
@@ -849,29 +865,87 @@ export default function Study() {
 
   const activeQuestion = questionList[activeQuestionIndex] ?? questionList[0];
 
+  const stepSlides = useMemo<StepSlide[]>(() => {
+    if (!activeQuestion) return [];
+
+    if (activeQuestion.id === "q1") {
+      return [
+        {
+          id: `${activeQuestion.id}-step-1`,
+          title: "Step 1 - Organize the information",
+          body: "",
+          table: {
+            headers: ["Female", "Male", "Total"],
+            rows: [
+              { label: "Science", values: ["9", "9", "18"] },
+              { label: "Computing", values: ["4", "8", "12"] },
+              { label: "Total", values: ["13", "17", "30"] },
+            ],
+          },
+        },
+        {
+          id: `${activeQuestion.id}-step-2`,
+          title: "Step 2 - Choose the method",
+          body: "For each subpart, pick the matching probability rule: simple probability, joint probability, or conditional probability.",
+        },
+        {
+          id: `${activeQuestion.id}-step-3`,
+          title: "Step 3 - Compute carefully",
+          body: "Use the counts from Step 1 and divide by the correct denominator for each part.",
+        },
+        {
+          id: `${activeQuestion.id}-step-4`,
+          title: "Step 4 - Check and conclude",
+          body: "Confirm every probability is between 0 and 1 and matches the exact wording in each sub-question.",
+        },
+      ];
+    }
+
+    return [
+      {
+        id: `${activeQuestion.id}-step-1`,
+        title: "Step 1 - Understand the question",
+        body: `Read ${activeQuestion.topic} and mark what is given, what is asked, and which parts must be answered.`,
+      },
+      {
+        id: `${activeQuestion.id}-step-2`,
+        title: "Step 2 - Choose the method",
+        body: "Pick the right method (probability rule, conditional probability, Bayes, counting, Poisson, binomial, or normal) before calculation.",
+      },
+      {
+        id: `${activeQuestion.id}-step-3`,
+        title: "Step 3 - Compute step by step",
+        body: "Substitute values carefully, keep intermediate calculations visible, and use complement/table/tree logic when needed.",
+      },
+      {
+        id: `${activeQuestion.id}-step-4`,
+        title: "Step 4 - Check and conclude",
+        body: "Write the final result clearly, ensure it matches the question wording, and verify probability bounds where relevant.",
+      },
+    ];
+  }, [activeQuestion]);
+
   useEffect(() => {
     setActiveQuestionIndex(0);
-    setSelectedAnswer(null);
-    setActiveSlideIndex(0);
-    slidesApi?.scrollTo(0);
+    setActiveStepIndex(0);
+    stepApi?.scrollTo(0);
   }, [selectedYear, examId]);
 
   useEffect(() => {
-    setSelectedAnswer(null);
+    setActiveStepIndex(0);
+    stepApi?.scrollTo(0);
   }, [activeQuestionIndex]);
 
   useEffect(() => {
-    if (!slidesApi) return;
+    if (!stepApi) return;
 
     const updateIndex = () => {
-      const selectedIndex = slidesApi.selectedScrollSnap();
-      setActiveSlideIndex(selectedIndex);
-      setActiveQuestionIndex(selectedIndex);
+      setActiveStepIndex(stepApi.selectedScrollSnap());
     };
 
     updateIndex();
-    slidesApi.on("select", updateIndex);
-  }, [slidesApi]);
+    stepApi.on("select", updateIndex);
+  }, [stepApi]);
 
   if (!activeQuestion) {
     return null;
@@ -920,22 +994,16 @@ export default function Study() {
           <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_350px]">
             <div className="min-w-0">
               <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <div className="mb-3 flex flex-wrap items-center gap-3">
-                    <Link
-                      to={lectureHref}
-                      className="rounded-full border border-white/15 bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-100"
-                    >
-                      Learning Mode
-                    </Link>
-                    <span className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white">
-                      Exam Mode
-                    </span>
-                  </div>
-                  <p className="mb-2 text-sm uppercase tracking-[0.25em] text-slate-400">Exam Mode</p>
-                  <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                    {course.title} {selectedYear}
-                  </h1>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link
+                    to={lectureHref}
+                    className="rounded-full border border-white/15 bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-100"
+                  >
+                    Learning Mode
+                  </Link>
+                  <span className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white">
+                    Exam Mode
+                  </span>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
@@ -966,135 +1034,126 @@ export default function Study() {
 
               <div className="mb-6 flex items-center justify-end">
                 <span className="text-sm font-medium text-slate-300">
-                  {activeSlideIndex + 1}/{questionList.length}
+                  Step {activeStepIndex + 1}/{Math.max(stepSlides.length, 1)}
                 </span>
               </div>
 
-              <Carousel
-                key={`${course.id}-${selectedYear}`}
-                setApi={setSlidesApi}
-                className="mb-6 w-full px-10"
-                opts={{ loop: false }}
-              >
-                <CarouselContent>
-                  {questionList.map((question) => (
-                    <CarouselItem key={question.id} className="basis-full">
-                      <article className="h-[460px] overflow-y-auto rounded-[32px] bg-white p-7 text-slate-900 shadow-[0_20px_60px_rgba(15,23,42,0.16)] sm:p-8">
-                        <p className="mb-2 text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">
-                          {question.label}
-                        </p>
-                        <h2 className="mb-5 text-3xl font-semibold tracking-tight">{question.topic}</h2>
-                        <div className="space-y-4 text-xl leading-10 text-slate-800">
-                          {question.fullPrompt?.map((paragraph) => (
-                            <p key={paragraph}>{paragraph}</p>
-                          ))}
-                          {question.subparts ? (
-                            <div className="space-y-2 pl-6">
-                              {question.subparts.map((part) => (
-                                <p key={part}>{part}</p>
-                              ))}
-                            </div>
-                          ) : (
-                            <p className="font-semibold text-slate-900">{question.text}</p>
-                          )}
-                        </div>
-                      </article>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious className="left-0 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white" />
-                <CarouselNext className="right-0 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white" />
-              </Carousel>
-
               <div className="px-10">
                 <div className="rounded-[28px] bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.16)]">
-                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="mb-1 text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
-                      Answer Area
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
+                      Solution Steps
                     </p>
-                    <h3 className="text-2xl font-semibold text-slate-900">
-                      {activeQuestion.label}
-                    </h3>
+                    <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white">
+                      Step {activeStepIndex + 1} of {Math.max(stepSlides.length, 1)}
+                    </span>
                   </div>
-                  <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-600">
-                    {activeQuestionIndex + 1}/{questionList.length}
-                  </span>
-                </div>
 
-                <div className="mb-6 rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4">
-                  <p className="text-2xl font-semibold leading-9 text-slate-900">{activeQuestion.text}</p>
-                </div>
-
-                <div className="space-y-3">
-                  {activeQuestion.options.map((option) => {
-                    const isSelected = selectedAnswer === option.id;
-                    const isCorrect = option.id === activeQuestion.correctAnswer;
-                    const showCorrect = selectedAnswer !== null && isCorrect;
-                    const showWrong = isSelected && !isCorrect;
-
-                    return (
-                      <button
-                        key={option.id}
-                        onClick={() => setSelectedAnswer(option.id)}
-                        className={`w-full rounded-2xl border p-4 text-left transition-all ${
-                          showCorrect
-                            ? "border-emerald-400 bg-emerald-50"
-                            : showWrong
-                              ? "border-rose-400 bg-rose-50"
-                              : isSelected
-                                ? "border-blue-400 bg-blue-50"
-                                : "border-slate-200 bg-white hover:border-slate-300"
-                        }`}
-                      >
-                        <span className="flex items-center gap-3">
-                          <span
-                            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
-                              showCorrect
-                                ? "border-emerald-500 bg-emerald-500"
-                                : showWrong
-                                  ? "border-rose-500 bg-rose-500"
-                                  : isSelected
-                                    ? "border-blue-500 bg-blue-500"
-                                    : "border-slate-300"
-                            }`}
-                          >
-                            {(showCorrect || showWrong || isSelected) && (
-                              <span className="h-2.5 w-2.5 rounded-full bg-white" />
-                            )}
-                          </span>
-                          <span className="text-base text-slate-700">
-                            {option.id.toUpperCase()}. {option.text}
-                          </span>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {selectedAnswer !== null ? (
-                  <div
-                    className={`mt-5 rounded-2xl border px-5 py-4 ${
-                      selectedAnswer === activeQuestion.correctAnswer
-                        ? "border-emerald-200 bg-emerald-50"
-                        : "border-amber-200 bg-amber-50"
-                    }`}
+                  <Carousel
+                    key={`${course.id}-${selectedYear}-${activeQuestion.id}`}
+                    setApi={setStepApi}
+                    className="mb-6 w-full px-10"
+                    opts={{ loop: false }}
                   >
-                    <div className="mb-2 flex items-center gap-2">
-                      <CheckCircle2
-                        className={`h-5 w-5 ${
-                          selectedAnswer === activeQuestion.correctAnswer
-                            ? "text-emerald-600"
-                            : "text-amber-600"
+                    <CarouselContent>
+                      {stepSlides.map((step) => (
+                        <CarouselItem key={step.id} className="basis-full">
+                          <article className="h-[300px] overflow-y-auto rounded-[28px] border border-slate-700 bg-slate-900 p-7 text-white shadow-[0_16px_40px_rgba(15,23,42,0.35)] sm:p-8">
+                            {step.body ? (
+                              <p className="mb-4 whitespace-pre-line text-xl leading-10 text-slate-200">{step.body}</p>
+                            ) : null}
+                            {step.sections ? (
+                              <div className="grid gap-3 sm:grid-cols-2">
+                                {step.sections.map((section) => (
+                                  <section
+                                    key={section.title}
+                                    className="rounded-2xl border border-slate-700/80 bg-slate-800/60 p-4"
+                                  >
+                                    <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300">
+                                      {section.title}
+                                    </h3>
+                                    <div className="space-y-2 text-base leading-7 text-slate-100">
+                                      {section.items.map((item) => (
+                                        <p key={item}>{item}</p>
+                                      ))}
+                                    </div>
+                                  </section>
+                                ))}
+                              </div>
+                            ) : null}
+                            {step.table ? (
+                              <div className="overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-800/60">
+                                <table className="w-full text-left">
+                                  <thead>
+                                    <tr className="border-b border-slate-700/80">
+                                      <th className="px-5 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-slate-300">
+                                        Group
+                                      </th>
+                                      {step.table.headers.map((header) => (
+                                        <th
+                                          key={header}
+                                          className="px-5 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-slate-300"
+                                        >
+                                          {header}
+                                        </th>
+                                      ))}
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {step.table.rows.map((row, rowIndex) => (
+                                      <tr
+                                        key={row.label}
+                                        className={rowIndex < step.table!.rows.length - 1 ? "border-b border-slate-700/60" : ""}
+                                      >
+                                        <td className="px-5 py-4 text-xl font-semibold text-white">{row.label}</td>
+                                        {row.values.map((value, valueIndex) => (
+                                          <td key={`${row.label}-${valueIndex}`} className="px-5 py-4 text-xl text-slate-100">
+                                            {value}
+                                          </td>
+                                        ))}
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            ) : null}
+                          </article>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="left-0 border-slate-700 bg-slate-900/95 text-white shadow-lg hover:bg-slate-800 hover:text-white" />
+                    <CarouselNext className="right-0 border-slate-700 bg-slate-900/95 text-white shadow-lg hover:bg-slate-800 hover:text-white" />
+                  </Carousel>
+
+                  <div className="mb-6 flex justify-center gap-2">
+                    {stepSlides.map((step, index) => (
+                      <button
+                        key={step.id}
+                        onClick={() => stepApi?.scrollTo(index)}
+                        className={`h-2.5 rounded-full transition-all ${
+                          index === activeStepIndex ? "w-8 bg-slate-900" : "w-2.5 bg-slate-300 hover:bg-slate-400"
                         }`}
+                        aria-label={`Go to step ${index + 1}`}
                       />
-                      <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-600">
-                        {selectedAnswer === activeQuestion.correctAnswer ? "Correct" : "Explanation"}
-                      </p>
-                    </div>
-                    <p className="text-base leading-7 text-slate-700">{activeQuestion.feedback}</p>
+                    ))}
                   </div>
-                ) : null}
+
+                  <div className="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-5">
+                    <div className="space-y-4 text-xl leading-10 text-slate-800">
+                      {activeQuestion.fullPrompt?.map((paragraph) => (
+                        <p key={paragraph}>{paragraph}</p>
+                      ))}
+                      {activeQuestion.subparts ? (
+                        <div className="space-y-2 pl-6">
+                          {activeQuestion.subparts.map((part) => (
+                            <p key={part}>{part}</p>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="font-semibold text-slate-900">{activeQuestion.text}</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1116,8 +1175,7 @@ export default function Study() {
                     key={question.id}
                     onClick={() => {
                       setActiveQuestionIndex(index);
-                      setSelectedAnswer(null);
-                      slidesApi?.scrollTo(index);
+                      stepApi?.scrollTo(0);
                     }}
                     className={`w-full rounded-[24px] border p-4 text-left transition-all ${
                       index === activeQuestionIndex

@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { BookOpen, Briefcase, Users, TrendingUp } from "lucide-react";
+import logoImage from "../../imports/logo1-transparent.png";
 
 export default function Dashboard() {
   const quickLinks = [
@@ -7,6 +8,7 @@ export default function Dashboard() {
     { to: "/moodle", label: "Moodle" },
     { to: "/outlook", label: "Outlook" },
     { to: "/timetable", label: "Timetable" },
+    { to: "/about", label: "About" },
   ];
 
   const featureCards = [
@@ -49,7 +51,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-6">
+    <div className="min-h-screen relative flex items-start justify-center p-6 pt-4">
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1648737851199-585cfd98c13a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920)' }}
@@ -80,8 +82,20 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="text-center mb-14">
-          <h1 className="text-4xl md:text-5xl mb-3 text-white tracking-tight">SETU Student Services</h1>
-          <p className="text-slate-300 text-lg">Choose your path to success</p>
+          <p
+            className="font-handwritten text-slate-200 text-3xl md:text-4xl mb-2 text-left tracking-wide"
+            style={{ textShadow: "0 2px 10px rgba(15, 23, 42, 0.35)" }}
+          >
+            ...Where Students and Businesses Grow Together
+          </p>
+          <div className="mb-4 flex justify-center">
+            <img
+              src={logoImage}
+              alt="CS-GO logo"
+              className="w-full max-w-[180px] h-auto object-contain"
+            />
+          </div>
+          <p className="text-slate-300 text-lg">Computer Science Growth &amp; Opportunities</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-5">

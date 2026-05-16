@@ -12,6 +12,8 @@ import JoinTeam from "./components/JoinTeam";
 import CareerSupport from "./components/CareerSupport";
 import PlacementEvents from "./components/PlacementEvents";
 import PortalPlaceholder from "./components/PortalPlaceholder";
+import About from "./components/About";
+import StudentChat from "./components/StudentChat";
 
 function placeholderRoute(title: string, badge: string, description: string) {
   return () =>
@@ -109,11 +111,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/student-chat",
-    Component: placeholderRoute(
-      "Student Chat",
-      "Quick Access",
-      "The dashboard shortcut now lands on a styled page instead of breaking the route.",
-    ),
+    Component: StudentChat,
   },
   {
     path: "/moodle",
@@ -138,6 +136,10 @@ export const router = createBrowserRouter([
       "Quick Access",
       "This route is now connected and styled to match the current Figma-inspired frontend.",
     ),
+  },
+  {
+    path: "/about",
+    Component: About,
   },
   {
     path: "*",

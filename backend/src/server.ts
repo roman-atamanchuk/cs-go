@@ -14,7 +14,7 @@ import {
 } from "./data/lectureContent.ts";
 
 const PORT = Number(process.env.PORT ?? "4000");
-const HOST = process.env.HOST ?? "127.0.0.1";
+const HOST = process.env.HOST ?? "0.0.0.0";
 const lecturesDir = resolve(process.cwd(), "..", "frontend", "src", "imports", "lectures");
 const pastExamsDir = resolve(process.cwd(), "..", "frontend", "src", "imports", "past-exams");
 
